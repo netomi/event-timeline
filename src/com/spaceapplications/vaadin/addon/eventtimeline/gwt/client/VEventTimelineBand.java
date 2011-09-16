@@ -92,11 +92,12 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
   }
   
   public void refreshAdjuster() {
-    int center = bandRoot.getAbsoluteLeft() + bandRoot.getOffsetWidth() / 2 - 8;
+    int center = bandRoot.getOffsetWidth() / 2 - 8;
     DOM.setStyleAttribute(bandAdjuster, "left", center + "px");
-    
-    int bottom = bandRoot.getAbsoluteTop() + bandRoot.getOffsetHeight() - 4;
-    DOM.setStyleAttribute(bandAdjuster, "top", bottom + "px");    
+
+    int bottom = bandRoot.getOffsetHeight() - bandLabel.getOffsetHeight() - 4;
+
+    DOM.setStyleAttribute(bandAdjuster, "top", bottom + "px");
   }
   
   @Override
