@@ -1,0 +1,10 @@
+<module>
+	<inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
+  <inherits name="com.spaceapplications.vaadin.addon.eventtimeline.gwt.canvas.gwt-canvas" />      
+  <inherits name="com.spaceapplications.vaadin.addon.eventtimeline.gwt.style.ComputedStyle" />
+        
+	<stylesheet src="eventtimeline-widget/styles.css" />
+<!--   <set-property name="user.agent" value="gecko1_8" /> -->
+
+    
+</module>
