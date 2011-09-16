@@ -146,7 +146,7 @@
 
 		<javac destdir="${result.classes}" target="1.5" source="1.5" debug="true" debuglevel="lines,source">
 			<src path="${preprocessed.source.path}/src" />
-			<src path="${test.src.base}" />
+<!--			<src path="${test.src.base}" /> -->
 			<src path="${preprocessed.source.path}/demo" />
 			<include name="**/*.*" />
 
