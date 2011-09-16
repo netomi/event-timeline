@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EventTimeline" basedir="../" default="all">
+
+	<!-- Main target that does all -->
+	<target name="all" depends="compile, widgetset, tests, manual, package-jar, package-zip, demo.war"/>
+
+	<!-- Build type specific configuration -->
+	<echo>Using build type specfic property file: "${build.properties.file}"</echo>
+	<property file="${build.properties.file}" />
+
+	<!-- Project specific settings. -->
+	<property file="build/build.properties" />
+
+	<!-- If not already set by the build system -->
+	<property name="version" value="${eventtimeline.version}" />
+
+	<property name="configure.libs" value="" />
+	<property name="module.junit.dir" value="${basedir}/build/result/unittests" />
+
+
+	<!-- ================================================================== -->
+	<!-- Initialization                                                     -->
+	<!-- ================================================================== -->
+
+	<!-- Clean old compilation results. -->
+	<target name="clean-all">
+		<delete dir="${result-path}" includes="**/*" followsymlinks="false" includeemptydirs="true" defaultexcludes="false" failonerror="false"/>
+	</target>
+
+	<!-- Checks that all the required libraries exist. -->
+	<target name="check-libs">
+		<available file="${gwt.lib.dir}/gwt-user.jar" property="gwt-user.present" />
+		<available file="${gwt.lib.dir}/gwt-dev.jar" property="gwt-dev.present" />
+		<available file="${gwt.lib.dir}/validation-api-1.0.0.GA.jar" property="gwt-user-validation.present" />
+		<available file="${gwt.lib.dir}/validation-api-1.0.0.GA-sources.jar" property="gwt-user-validation-sources.present" />
+
+		<fail message="${gwt.lib.dir}/gwt-user.jar missing" unless="gwt-user.present" />
+		<fail message="${gwt.lib.dir}/gwt-dev.jar missing" unless="gwt-dev.present" />
+		<fail message="${gwt.lib.dir}/validation-api-1.0.0.GA.jar missing" unless="gwt-user-validation.present" />
+		<fail message="${gwt.lib.dir}/validation-api-1.0.0.GA-sources.jar missing" unless="gwt-user-validation-sources.present" />
+	</target>
+
+	<!-- Initialization -->
+	<target name="init">
+		<echo>Add-on version: "${version}"</echo>
+
+		<echo>Requirements for classpath:</echo>
+		<echo> ${gwt.lib.dir}/gwt-user.jar</echo>
+		<echo> ${gwt.lib.dir}/gwt-dev.jar</echo>
+		<echo> ${gwt.lib.dir}/validation-api-1.0.0.GA.jar</echo>
+		<echo> ${gwt.lib.dir}/validation-api-1.0.0.GA-sources.jar</echo>
+
+		<antcall target="check-libs"/>
+
+		<path id="test.classpath">
+			<fileset dir="build/lib">
+				<include name="**/*.jar" />
+			</fileset>
+
+			<fileset dir="WebContent/WEB-INF/lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+
+		<path id="compile.classpath">
+			<fileset dir="build/lib">
+				<include name="**/*.jar" />
+			</fileset>
+
+			<fileset dir="WebContent/WEB-INF/lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</path>
+	</target>
+
+	<!-- Fetch repository changes -->
+	<target name="svn-update" unless="eclipse.running">
+		<exec executable="svn">
+			<arg line="update" />
+		</exec>
+	</target>
+
+	<!-- ================================================================== -->
+	<!-- Compilation                                                        -->
+	<!-- ================================================================== -->
+
+	<target name="preprocess-src">
+
+		<property file="doc/java-license-header-${license.short.name}.properties" />
+
+		<!-- The source directory and the demo source directory are copied to
+    	     {$result-path}/src/preprocessed/[src|demo] after filtering (setting
+    	     version number in Java files) -->
+
+		<property name="preprocessed.source.path" value="${result-path}/preprocessed" />
+		<mkdir dir="${preprocessed.source.path}/src" />
+		<mkdir dir="${preprocessed.source.path}/demo" />
+
+		<patternset id="preprocessable-files">
+			<include name="**/*.java" />
+		</patternset>
+		<patternset id="non-preprocessable-files">
+			<exclude name="**/.svn" />
+			<exclude name="**/*.java" />
+		</patternset>
+		<filterset id="version-license-filter">
+			<filter token="VERSION" value="${version}" />
+			<filter token="VaadinAddonLicenseForJavaFiles" value="${license.header.text}" />
+		</filterset>
+
+		<echo>Copying src directory and processing copied files.</echo>
+		<echo>Replacing @VERSION@ and @VaadinAddonLicenseForJavaFiles@ tags for java files.</echo>
+		<copy todir="${preprocessed.source.path}/src" overwrite="yes">
+			<filterset refid="version-license-filter"/>
+			<fileset dir="src">
+				<patternset refid="preprocessable-files" />
+			</fileset>
+		</copy>
+		<copy todir="${preprocessed.source.path}/demo" overwrite="yes">
+			<filterset refid="version-license-filter"/>
+			<fileset dir="${demo.src.base}">
+				<patternset refid="preprocessable-files" />
+			</fileset>
+		</copy>
+
+		<!-- Add other files such as images, these are not filtered -->
+		<echo>Copying non java/html/css/xml files such as images.</echo>
+		<copy todir="${preprocessed.source.path}/src">
+			<fileset dir="src">
+				<patternset refid="non-preprocessable-files" />
+			</fileset>
+		</copy>
+		<copy todir="${preprocessed.source.path}/demo">
+			<fileset dir="${demo.src.base}">
+				<patternset refid="non-preprocessable-files" />
+			</fileset>
+		</copy>
+
+	</target>
+
+	<!-- Compile server-side Java -->
+	<target name="compile" depends="init,preprocess-src" unless="run.no-compile">
+		<property name="result.classes" value="${result-path}/war/WEB-INF/classes"/>
+
+		<mkdir dir="${result.classes}"/>
+
+		<javac destdir="${result.classes}" target="1.5" source="1.5" debug="true" debuglevel="lines,source">
+			<src path="${preprocessed.source.path}/src" />
+			<src path="${test.src.base}" />
+			<src path="${preprocessed.source.path}/demo" />
+			<include name="**/*.*" />
+
+			<classpath refid="test.classpath" />
+			<classpath refid="compile.classpath" />
+			<classpath>
+				<path path="${preprocessed.source.path}/src" />
+				<path path="test-src" />
+				<path path="WebContent/WEB-INF/classes" />
+				<path path="${gwt.lib.dir}/gwt-user.jar" />
+				<path path="${gwt.lib.dir}/gwt-dev.jar" />
+			</classpath>
+		</javac>
+
+	</target>
+
+	<!-- Check if there are new modifications to widgetset sources -->
+	<target name="check-widgetset-uptodate">
+		<echo>Checking if widgetset needs to be rebuilt</echo>
+		<uptodate targetfile="WebContent/VAADIN/widgetsets/.widgetset" property="widgetset.uptodate">
+			<srcfiles dir="src" includes="**/gwt/**/*" />
+		</uptodate>
+	</target>
+
+	<!-- Refresh the project in a locally running Eclipse. -->
+	<target name="refresh-eclipse" if="eclipse.running">
+		<echo>Refreshing project folder</echo>
+		<eclipse.refreshLocal resource="EventTimelineTest" depth="infinite" />
+	</target>
+
+	<!-- Compile client-side Java -->
+	<target name="widgetset" depends="init,check-widgetset-uptodate" unless="widgetset.uptodate, run.no-tests">
+		<echo>Compiling widgetset</echo>
+
+		<java classname="com.vaadin.tools.WidgetsetCompiler" failonerror="yes" fork="yes" maxmemory="512m">
+			<arg value="-out" />
+			<arg value="WebContent/VAADIN/widgetsets" />
+			<arg value="${addon.widgetset}" />
+			<jvmarg value="-Xss1024k" />
+			<jvmarg value="-Xmx1024M" />
+			<jvmarg value="-Djava.awt.headless=true" />
+			<classpath>
+				<path path="${preprocessed.source.path}/src" />
+				<path path="${basedir}/${result-path}/war/WEB-INF/classes" />
+				<path path="WebContent/WEB-INF/classes" />
+				<fileset dir="${gwt.lib.dir}">
+					<include name="**/gwt-*.jar" />
+					<include name="**/validation-api-*.jar" />
+				</fileset>
+				<fileset dir="WebContent/WEB-INF/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</java>
+
+		<touch file="WebContent/VAADIN/widgetsets/.widgetset" verbose="true" />
+
+		<antcall target="refresh-eclipse" />
+	</target>
+
+	<!-- ================================================================== -->
+	<!-- Testing                                                            -->
+	<!-- ================================================================== -->
+
+	<!-- Vaadin TestBench tests -->
+	<target name="testbench-tests">
+		<subant target="run-and-clean-up" antfile="test.xml">
+			<fileset dir="test" includes="test.xml"/>
+		</subant>
+	</target>
+
+	<!-- Server-side JUnit tests -->
+	<target name="serverside-tests" depends="compile">
+		<echo>Running JUnit tests in ${test.src.base}/${test.src.dir}</echo>
+
+		<echo>Test source base: ${test.src.base}</echo>
+		<echo>Test source dir:  ${test.src.dir}</echo>
+
+		<junit printsummary="yes" showoutput="true">
+			<classpath>
+				<pathelement path="${result.classes}" />
+				<path refid="compile.classpath"/>
+				<path refid="test.classpath"/>
+			</classpath>
+
+			<batchtest fork="yes">
+				<fileset dir="${test.src.base}" includes="${test.src.dir}/**/*.java"/>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="tests" />
+	<!-- depends="serverside-tests" unless="run.no-tests"/> -->
+
+	<!-- ================================================================== -->
+	<!-- Documentation                                                      -->
+	<!-- ================================================================== -->
+
+	<!-- Manual -->
+	<target name="manual" unless="run.no-manual">
+		<!-- Must delete the old version or conversion fails -->
+		<!--        <delete file="${manual.pdf}"/> -->
+
+		<!-- Start OpenOffice service -->
+		<!--        <exec executable="python" searchpath="true" failonerror="true" >
+            <arg value="build/odf-converter.py"/>
+            <arg value="start"/>
+        </exec> -->
+
+		<!-- Convert the ODF text document to PDF -->
+		<!--        <java jar="build/lib/jodconverter/jodconverter-cli-2.2.2.jar" fork="true">
+            <arg value="${manual.odt}"/>
+            <arg value="${manual.pdf}"/>
+        </java> -->
+
+		<!-- Stop OpenOffice service -->
+		<!--        <exec executable="python" searchpath="true" failonerror="true" >
+            <arg value="build/odf-converter.py"/>
+            <arg value="stop"/>
+        </exec>-->
+	</target>
+
+	<target name="javadoc" depends="init,preprocess-src">
+		<property name="javadoc.destdir" value="${result-path}/docs/api"/>
+
+		<javadoc destdir="${javadoc.destdir}" author="true" version="true" use="true" windowtitle="${addon.name}" classpathref="compile.classpath">
+			<packageset dir="${preprocessed.source.path}/src">
+				<include name="com/spaceapplications/vaadin/addon/**" />
+				<exclude name="**/gwt/**" />
+			</packageset>
+			<doctitle>${javadoc.doctitle}</doctitle>
+			<!-- <header><![CDATA[<script type="text/javascript" src=".html-style/style.js"></script>]]></header> -->
+			<bottom>${javadoc.bottom}</bottom>
+			<link offline="true" href="http://download.oracle.com/javase/6/docs/api/" packagelistLoc="build/javadoc/j2se-1.6.0" />
+			<link offline="true" href="http://java.sun.com/javaee/5/docs/api/" packagelistLoc="build/javadoc/j2ee-1.5" />
+			<link offline="true" href="http://demo.vaadin.com/docs/api/" packagelistLoc="build/javadoc/vaadin" />
+		</javadoc>
+	</target>
+
+	<!-- ================================================================== -->
+	<!-- Packaging                                                          -->
+	<!-- ================================================================== -->
+
+	<!-- Create the JAR package. -->
+	<target name="package-jar" depends="compile" unless="run.no-package-jar">
+		<property name="jar.name" value="${addon.name}-${license.short.name}-${version}.jar"/>
+		<property name="jar.path" value="${result-path}/${jar.name}"/>
+
+		<jar jarfile="${jar.path}" compress="true">
+			<manifest>
+				<attribute name="Vaadin-Package-Version" value="1" />
+				<attribute name="Vaadin-Widgetsets" value="${addon.widgetset}" />
+				<attribute name="Implementation-Title" value="${addon.title}" />
+				<attribute name="Implementation-Version" value="${version}" />
+				<attribute name="Implementation-Vendor" value="${addon.vendor}" />
+			</manifest>
+
+			<!-- The built server-side classes and the widget set class are here. -->
+			<fileset dir="${result.classes}">
+				<patternset>
+					<include name="${src.package.dir}/**/*" />
+					<exclude name="**/tests/**" />
+					<exclude name="**/demo/**" />
+				</patternset>
+			</fileset>
+
+			<!-- Especially all the widget set source files are required. -->
+			<fileset dir="${preprocessed.source.path}/src">
+				<patternset>
+					<include name="${src.package.dir}/**/*" />
+				</patternset>
+			</fileset>
+
+		</jar>
+	</target>
+
+	<!-- Create the ZIP distribution package. -->
+	<target name="package-zip" depends="package-jar, javadoc, manual" unless="run.no-package-jar">
+		<property name="zip.name" value="${result-path}/${addon.name}-${license.short.name}-${version}.zip"/>
+
+		<!-- Make the zip manifest -->
+		<mkdir dir="${result-path}/META-INF"/>
+		<echo file="${result-path}/META-INF/MANIFEST.MF">Vaadin-Addon: ${jar.name}
+Vaadin-Package-Version: 1
+Implementation-Title: ${addon.title}
+Implementation-Version: ${version}
+Implementation-Vendor: ${addon.vendor}
+       </echo>
+
+		<zip destfile="${zip.name}">
+			<zipfileset dir="${result-path}" includes="META-INF/MANIFEST.MF" />
+			<zipfileset prefix="" file="${result-path}/${jar.name}" />
+			<zipfileset prefix="doc" file="${manual.pdf}" />
+			<zipfileset prefix="doc/api" dir="${javadoc.destdir}" />
+			<zipfileset prefix="doc" dir="doc">
+				<patternset>
+					<!-- Omit empty README.TXT -->
+					<!-- <include name="README.TXT" /> -->
+					<include name="license-${license.short.name}.txt" />
+					<include name="license-apache-2.0.txt" />
+				</patternset>
+			</zipfileset>
+			<zipfileset file="doc/licensing-${license.short.name}.txt" fullpath="doc/licensing.txt" />
+		</zip>
+	</target>
+
+	<target name="demo.war" depends="package-jar, javadoc">
+		<war destfile="${result-path}/${addon.name}.war" webxml="WebContent/WEB-INF/web.xml">
+			<classes dir="${result.classes}"/>
+			<lib dir="WebContent/WEB-INF/lib" excludes="*src*" />
+			<lib file="${jar.path}" />
+			<fileset dir="WebContent">
+				<patternset>
+					<include name="VAADIN/widgetsets/${addon.widgetset}/**/*" />
+					<include name="VAADIN/themes/**/*" />
+				</patternset>
+			</fileset>
+			<fileset dir="${javadoc.destdir}/.." includes="api/**/*" />
+		</war>
+	</target>
+
+</project>
+
+<!-- Keep this comment at the end of the file
+Local variables:
+mode: xml
+sgml-omittag:nil
+sgml-shorttag:nil
+sgml-namecase-general:nil
+sgml-general-insert-case:lower
+sgml-minimize-attributes:nil
+sgml-always-quote-attributes:t
+sgml-indent-step:4
+sgml-indent-data:t
+sgml-parent-document:nil
+sgml-exposed-tags:nil
+sgml-local-catalogs:("/etc/sgml/catalog" "/usr/share/xemacs21/xemacs-packages/etc/psgml-dtds/CATALOG")
+sgml-local-ecat-files:("ECAT" "~/sgml/ECAT" "/usr/share/sgml/ECAT" "/usr/local/share/sgml/ECAT" "/usr/local/lib/sgml/ECAT")
+End:
+-->
