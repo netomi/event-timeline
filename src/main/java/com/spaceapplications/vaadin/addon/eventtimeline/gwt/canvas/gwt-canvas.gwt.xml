@@ -55,4 +55,8 @@
 	<source path='client'/>
 	<inherits name="com.google.gwt.dom.DOM"/>
 
+
+    <inherits name="com.vaadin.terminal.gwt.DefaultWidgetSet" />
+
+    <inherits name="com.spaceapplications.vaadin.addon.eventtimeline.gwt.EventTimelineWidgetSet" />
 </module>

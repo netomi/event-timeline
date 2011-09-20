@@ -4,6 +4,7 @@
 Version 0.4.0 - xx.xx.2011
 --------------------------
 
+   - added maven build config
    - fixed positioning of band adjuster
    - band adjuster are only visible when hovering over the band area
    - the grid color can now be set using CSS3 style rgba values

@@ -43,14 +43,14 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
   private int dragStartY;
 
   private HandlerRegistration mouseMoveReg, mouseUpReg, mouseDownReg, preview;
-  
+
   private int bandId;
   private VEventTimelineBandArea bandArea;
 
   public VEventTimelineBand(int bandId, final String caption, final VEventTimelineBandArea bandArea) {
     this.bandId = bandId;
     this.bandArea = bandArea;
-    
+
     bandRoot = DOM.createDiv();
     setElement(bandRoot);
 
@@ -61,10 +61,8 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
     bandLabel.setInnerText(caption);
     bandRoot.appendChild(bandLabel);
 
-    // FIXME: the adjuster does not work correctly in IE
     bandAdjuster = DOM.createDiv();
     bandAdjuster.setClassName(CLASSNAME_BAND_ADJUSTER);
-
     bandRoot.appendChild(bandAdjuster);
   }
 
@@ -75,31 +73,10 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
     mouseUpReg = addDomHandler(this, MouseUpEvent.getType());
     mouseMoveReg = addDomHandler(this, MouseMoveEvent.getType());
     preview = Event.addNativePreviewHandler(this);
+    
+    disableAdjuster();
   }
 
-  
-  @Override
-  public void setWidth(String width) {
-    super.setWidth(width);
-    refreshAdjuster();
-  }
-
-  
-  @Override
-  public void setHeight(String height) {
-    super.setHeight(height);
-    refreshAdjuster();
-  }
-  
-  public void refreshAdjuster() {
-    int center = bandRoot.getOffsetWidth() / 2 - 8;
-    DOM.setStyleAttribute(bandAdjuster, "left", center + "px");
-
-    int bottom = bandRoot.getOffsetHeight() - bandLabel.getOffsetHeight() - 4;
-
-    DOM.setStyleAttribute(bandAdjuster, "top", bottom + "px");
-  }
-  
   @Override
   protected void onUnload() {
     super.onUnload();
@@ -121,6 +98,39 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
     }
   }
 
+  @Override
+  public void setWidth(String width) {
+    super.setWidth(width);
+    updateBandAdjuster();
+  }
+
+  @Override
+  public void setHeight(String height) {
+    super.setHeight(height);
+    updateBandAdjuster();
+  }
+
+  public int getHeight() {
+    return DOM.getIntStyleAttribute(bandRoot, "height");
+  }
+  
+  public void updateBandAdjuster() {
+    int center = bandRoot.getOffsetWidth() / 2 - 8;
+    DOM.setStyleAttribute(bandAdjuster, "left", center + "px");
+
+    int bottom = bandRoot.getOffsetHeight() - bandLabel.getOffsetHeight() - 4;
+
+    DOM.setStyleAttribute(bandAdjuster, "top", bottom + "px");
+  }
+
+  public void enableAdjuster() {
+    DOM.setStyleAttribute(bandAdjuster, "visibility", "visible");
+  }
+  
+  public void disableAdjuster() {
+    DOM.setStyleAttribute(bandAdjuster, "visibility", "hidden");
+  }
+  
   public boolean isMouseOverSizeAdjuster(Event mouseEvent) {
     Element mouseOver = (Element) Element.as(mouseEvent.getEventTarget());
     return mouseOver == bandAdjuster;
@@ -152,7 +162,7 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
 
     DOM.releaseCapture(bandRoot);
     sizeAdjust = false;
-    
+
     // redraw
     bandArea.redraw();
   }
@@ -165,11 +175,11 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
    */
   public void onMouseMove(MouseMoveEvent event) {
     NativeEvent mouseEvent = event.getNativeEvent();
+
     if (mouseDown) {
       int adjustment = mouseEvent.getClientY() - dragStartY;
       if (sizeAdjust) {
-        int newHeight = getHeight() + adjustment;
-        if (bandArea.requestResize(bandId, newHeight)) {
+        if (bandArea.requestResize(bandId, getHeight(), adjustment)) {
           dragStartY = mouseEvent.getClientY();
         }
       }
@@ -183,11 +193,9 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
    * .gwt.event.dom.client.MouseDownEvent)
    */
   public void onMouseDown(MouseDownEvent event) {
-    NativeEvent mouseEvent = event.getNativeEvent();
-    //Element mouseOver = (Element) Element.as(mouseEvent.getEventTarget());
-
     mouseIsActive = true;
 
+    NativeEvent mouseEvent = event.getNativeEvent();
     event.preventDefault();
     event.stopPropagation();
 
@@ -211,9 +219,5 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler, Mous
         && event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
       mouseDown = true;
     }
-  }
-  
-  public int getHeight() {
-    return DOM.getIntStyleAttribute(bandRoot, "height");
   }
 }

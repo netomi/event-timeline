@@ -26,4 +26,6 @@
       <when-property-is name='user.agent' value='ie8'/>      
     </any>
   </replace-with>
+
+    <inherits name="com.spaceapplications.vaadin.addon.eventtimeline.gwt.EventTimelineWidgetSet" />
 </module>

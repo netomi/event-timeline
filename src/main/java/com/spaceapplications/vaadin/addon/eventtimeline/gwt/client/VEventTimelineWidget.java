@@ -388,8 +388,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
     setStartDate(uidl);
     setEndDate(uidl);
 
+    setGridColor(uidl);
     setZoomLevels(uidl);
-
     setZoomCaption(uidl);
 
     setZoomVisibility(uidl);
@@ -570,8 +570,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
       if (color == null || color.equals("")) {
         initGridColor = null;
       } else {
-        String[] rgba = color.split(";");
-        initGridColor = "rgba(" + rgba[0] + "," + rgba[1] + "," + rgba[2] + "," + rgba[3] + ")";
+        initGridColor = color;
       }
 
       if (initStage1Done) {
@@ -738,6 +737,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
         UIDL child = (UIDL) it.next();
         if (child != null && "band".equals(child.getTag())) {
           Integer id = child.getIntAttribute("bandid");
+          //String[] eventsArray = child.getStringArrayAttribute("events");
+          //events = getEventsFromStringArray(eventsArray);
           events = getEvents(child);
           cache.addToCache(id, new Date(startTime), new Date(endTime), events);
 
@@ -794,6 +795,27 @@ public class VEventTimelineWidget extends Composite implements Paintable {
     return events;
   }
 
+  protected List<VEvent> getEventsFromStringArray(final String[] array) {
+    List<VEvent> events = new ArrayList<VEvent>();
+    for (String str : array) {
+      String[] vals = str.split(";");
+      
+      VEvent e = new VEvent();
+
+      e.setID(vals[0]);
+      e.setCaption(vals[1]);
+      e.setStart(dateformat_date.parse(vals[2]));
+      e.setEnd(dateformat_date.parse(vals[3]));
+      e.setStartTime(Long.valueOf(vals[4]));
+      e.setEndTime(Long.valueOf(vals[5]));
+      e.setDescription(vals[6]);
+      e.setStyleName(vals[7]);
+
+      events.add(e);
+    }
+    return events;
+  }
+  
   /**
    * Set the not data state
    * 

@@ -26,24 +26,22 @@ public class MyEventTimelineDemo extends Application {
     timeline.setHeight("500px");
     timeline.setWidth("100%");
 
+    Calendar cal = Calendar.getInstance();
+    Date start = cal.getTime();
+    cal.add(Calendar.DAY_OF_WEEK, 1);
+    Date end = cal.getTime();
+    
     // Create the data sources
-    final TimelineEventProvider eventProvider1 = createEventProvider1();
-    final TimelineEventProvider eventProvider2 = createEventProvider2();
-    final TimelineEventProvider eventProvider3 = createEventProvider3();
+    final TimelineEventProvider eventProvider1 = createEventProvider1(end);
+    final TimelineEventProvider eventProvider2 = createEventProvider2(end);
+    final TimelineEventProvider eventProvider3 = createEventProvider3(end);
 
     // Add our data sources
     timeline.addEventBand("Band 1", eventProvider1);
     timeline.addEventBand("Band 2", eventProvider2);
     timeline.addEventBand("Band 3", eventProvider3);
 
-    Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.HOUR_OF_DAY, 3);
-    Date end = cal.getTime();
-    cal.add(Calendar.DAY_OF_WEEK, -1);
-    Date start = cal.getTime();
-
     timeline.setVisibleDateRange(start, end);
-    timeline.setGraphLegendVisible(false);
 
     // Add some zoom levels
     timeline.addZoomLevel("Hour", 60 * 60 * 1000L);
@@ -64,19 +62,15 @@ public class MyEventTimelineDemo extends Application {
     });
   }
 
-  public TimelineEventProvider createEventProvider1() {
+  public TimelineEventProvider createEventProvider1(final Date end) {
     BasicEventProvider provider = new BasicEventProvider();
     
-    // Add a marker for every seven days
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DAY_OF_WEEK, -1);
     cal.add(Calendar.HOUR, 6);
-    Date today = new Date();
     int idx = 0;
-    while (cal.getTime().before(today)) {
+    while (cal.getTime().before(end)) {
       // Create a point in time
       BasicEvent event = new BasicEvent();
-
       event.setEventId(String.valueOf(idx));
       
       // Set the timestamp property
@@ -99,20 +93,15 @@ public class MyEventTimelineDemo extends Application {
     return provider;
   }
   
-  public TimelineEventProvider createEventProvider2() {
+  public TimelineEventProvider createEventProvider2(final Date end) {
     BasicEventProvider provider = new BasicEventProvider();
     
-    // Add a marker for every seven days
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.HOUR_OF_DAY, 3);
-    Date end = cal.getTime();
-    cal.add(Calendar.DAY_OF_WEEK, -1);
-    cal.add(Calendar.HOUR, 2);
+    cal.add(Calendar.HOUR_OF_DAY, 2);
     int idx = 0;
     while (cal.getTime().before(end)) {
       // Create a point in time
       BasicEvent event = new BasicEvent();
-
       event.setEventId(String.valueOf(idx++));
       
       // Set the timestamp property
@@ -129,19 +118,15 @@ public class MyEventTimelineDemo extends Application {
     return provider;
   }
   
-  public TimelineEventProvider createEventProvider3() {
+  public TimelineEventProvider createEventProvider3(final Date end) {
     BasicEventProvider provider = new BasicEventProvider();
     
-    // Add a marker for every seven days
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.DAY_OF_WEEK, -1);
     cal.add(Calendar.HOUR, 6);
-    Date today = new Date();
     int idx = 0;
-    while (cal.getTime().before(today)) {
+    while (cal.getTime().before(end)) {
       // Create a point in time
       BasicEvent event = new BasicEvent();
-
       event.setEventId(String.valueOf(idx));
       
       // Set the timestamp property

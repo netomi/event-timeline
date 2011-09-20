@@ -43,14 +43,6 @@ public class EventTimeline extends AbstractComponent {
   // Event band captions
   protected List<String> bandCaptions = new ArrayList<String>();
 
-  /**
-   * The width of the canvas.<br/>
-   * This is received from the client side when the graph has loaded and used in measuring the
-   * density of the points to send to the client side.
-   */
-  @SuppressWarnings("unused")
-  private int canvasWidth = 0;
-
   // Initialization is done
   private boolean initDone = false;
 
@@ -133,13 +125,10 @@ public class EventTimeline extends AbstractComponent {
   protected boolean dateSelectEnabled = true;
 
   // Is the legend visible
-  protected boolean legendVisible = true;
+  protected boolean legendVisible = false;
 
-  // The graph grid color
-  // protected Color gridColor = Color.LIGHT_GRAY;
-  // TODO: removed reference to java.awt.Color as it is blacklisted in GAE
-  //       use css 3 syntax rgba() instead
-  protected String gridColor = "192;192;192;1";
+  // The graph grid color (as CSS3 style rgba string)
+  protected String gridColor = "rgba(192,192,192,1)";
 
   // Date formats
   protected final DateFormatInfo dateFormatInfo = new DateFormatInfo();
@@ -650,11 +639,6 @@ public class EventTimeline extends AbstractComponent {
   @Override
   public void changeVariables(Object source, @SuppressWarnings("rawtypes") Map variables) {
 
-    // The width of the canvas area. Used in measuring density.
-    if (variables.containsKey("canvasWidth")) {
-      canvasWidth = Integer.parseInt(variables.get("canvasWidth").toString());
-    }
-
     // Initialization data requested from the client side (refresh occurred)
     if (variables.containsKey("init")) {
       initDataFlags();
@@ -706,38 +690,6 @@ public class EventTimeline extends AbstractComponent {
     }
   }
 
-  /**
-   * Converts a AWT Color to a rgb/rgba separated string
-   * 
-   * @param c
-   *          The color to convert
-   * @param separator
-   *          The separator
-   * @param includeAlpha
-   *          Should the alpha color be appended
-   * @return A string representation of the color
-   */
-  // private static String colorToString(Color c, String separator, boolean includeAlpha) {
-  // String red = String.valueOf(c.getRed());
-  // String green = String.valueOf(c.getGreen());
-  // String blue = String.valueOf(c.getBlue());
-  // String alpha = String.valueOf(c.getAlpha());
-  //
-  // StringBuilder color = new StringBuilder();
-  // color.append(red);
-  // color.append(separator);
-  // color.append(green);
-  // color.append(separator);
-  // color.append(blue);
-  //
-  // if (includeAlpha) {
-  // color.append(separator);
-  // color.append(alpha);
-  // }
-  //
-  // return color.toString();
-  // }
-
   /*
    * (non-Javadoc)
    * 
@@ -770,6 +722,7 @@ public class EventTimeline extends AbstractComponent {
       for (Map.Entry<Integer, List<TimelineEvent>> entry : eventsToSend.entrySet()) {
         target.startTag("band");
         target.addAttribute("bandid", entry.getKey());
+        //target.addAttribute("events", getEventsAsStringArray(entry.getValue()));
         for (TimelineEvent event : entry.getValue()) {
           target.startTag("event");
           paintEvent(event, target);
@@ -829,7 +782,6 @@ public class EventTimeline extends AbstractComponent {
     // Send the graph grid color if it has changed
     if (sendGridColor) {
       // target
-      // .addAttribute("gridColor", gridColor == null ? "" : colorToString(gridColor, ";", true));
       target.addAttribute("gridColor", gridColor == null ? "" : gridColor);
       sendGridColor = false;
     }
@@ -875,6 +827,33 @@ public class EventTimeline extends AbstractComponent {
         e.getStyleName() == null ? "" : e.getStyleName());
   }
 
+  protected String[] getEventsAsStringArray(final List<TimelineEvent> events) throws PaintException {
+    String[] result = new String[events.size()];
+    
+    int idx = 0;
+    for (TimelineEvent e : events) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(e.getEventId());
+      sb.append(";");
+      sb.append(e.getCaption());
+      sb.append(";");
+      sb.append(df_date.format(e.getStart()));
+      sb.append(";");
+      sb.append(df_date.format(e.getEnd()));
+      sb.append(";");
+      sb.append(e.getStart().getTime());
+      sb.append(";");
+      sb.append(e.getEnd().getTime());
+      sb.append(";");
+      sb.append(e.getDescription());
+      sb.append(";");
+      sb.append(e.getStyleName());
+      result[idx++] = sb.toString();
+    }
+    
+    return result;
+  }
+  
   /**
    * Add another event band.
    * 
@@ -1193,11 +1172,11 @@ public class EventTimeline extends AbstractComponent {
   }
 
   /**
-   * Sets the color of the graph grid.<br/>
+   * Sets the color of the grid.<br/>
    * Setting the color to NULL will remove the grid.
    * 
    * @param color
-   *          The color of the grid or Null to remove the grid
+   *          The color (as CSS3-style rgba string) of the grid or Null to remove the grid
    */
   public void setGridColor(String color) {
     gridColor = color;
@@ -1206,14 +1185,6 @@ public class EventTimeline extends AbstractComponent {
       requestRepaint();
     }
   }
-//  
-//  public void setGridColor(Color color) {
-//    gridColor = color;
-//    sendGridColor = true;
-//    if (initDone) {
-//      requestRepaint();
-//    }
-//  }
 
   /**
    * Gets the grid color used to draw the vertical and horizontal scale grids.<br/>
@@ -1225,10 +1196,6 @@ public class EventTimeline extends AbstractComponent {
     return gridColor;
   }
   
-//  public Color getGridColor() {
-//    return gridColor;
-//  }
-
   /**
    * When using dynamically updating graphs the updates may cause the selection bar to move when new
    * items are added to the data source and the graph changes. To lock the browser bar so it stays
