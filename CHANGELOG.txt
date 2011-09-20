@@ -1,0 +1,14 @@
+                                     EVENT TIMELINE
+                                  Development Changelog
+
+Version 0.4.0 - xx.xx.2011
+--------------------------
+
+   - fixed positioning of band adjuster
+   - band adjuster are only visible when hovering over the band area
+   - the grid color can now be set using CSS3 style rgba values
+ 
+Version 0.3.0 - 16.09.2011
+--------------------------
+
+   - initial release to vaadin addon-store and github
