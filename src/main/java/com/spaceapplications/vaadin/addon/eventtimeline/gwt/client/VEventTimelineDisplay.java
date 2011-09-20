@@ -493,10 +493,10 @@ public class VEventTimelineDisplay extends Widget implements VDataListener, Mous
 
     // paint horizontal lines to separate bands
     canvas.setStrokeStyle("#000");
-    canvas.setLineWidth(1.0);
+    canvas.setLineWidth(0.5);
     canvas.beginPath();
 
-    y = 0;
+    y = 1;
     for (Integer band : currentEvents.keySet()) {
       y += widget.getBandHeight(band);
 

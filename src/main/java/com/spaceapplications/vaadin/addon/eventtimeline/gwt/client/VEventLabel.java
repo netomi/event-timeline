@@ -23,6 +23,7 @@ public class VEventLabel extends Label {
     setStylePrimaryName(VEventTimelineDisplay.CLASSNAME_EVENT);
 
     final Element caption = DOM.createDiv();
+    // FIXME: the limits to show the caption are hard-coded by now
     if (w > 45 && h > 20) {
       caption.setInnerText(Util.escapeHTML(event.getCaption()));
     } else {
