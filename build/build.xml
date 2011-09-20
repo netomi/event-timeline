@@ -112,7 +112,7 @@
 		<echo>Replacing @VERSION@ and @VaadinAddonLicenseForJavaFiles@ tags for java files.</echo>
 		<copy todir="${preprocessed.source.path}/src" overwrite="yes">
 			<filterset refid="version-license-filter"/>
-			<fileset dir="src">
+			<fileset dir="src/main/java">
 				<patternset refid="preprocessable-files" />
 			</fileset>
 		</copy>
@@ -126,7 +126,7 @@
 		<!-- Add other files such as images, these are not filtered -->
 		<echo>Copying non java/html/css/xml files such as images.</echo>
 		<copy todir="${preprocessed.source.path}/src">
-			<fileset dir="src">
+			<fileset dir="src/main/java">
 				<patternset refid="non-preprocessable-files" />
 			</fileset>
 		</copy>
