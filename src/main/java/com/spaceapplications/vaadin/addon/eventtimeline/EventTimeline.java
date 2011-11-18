@@ -23,6 +23,7 @@ import com.vaadin.terminal.PaintTarget;
 import com.vaadin.ui.AbstractComponent;
 import com.vaadin.ui.ClientWidget;
 import com.vaadin.ui.Component;
+import com.vaadin.ui.ClientWidget.LoadStyle;
 
 /**
  * EventTimeline implementation, based on original version from vaadin-timeline.
@@ -30,7 +31,7 @@ import com.vaadin.ui.Component;
  * @author Thomas Neidhart / Space Applications Services NV/SA
  * @author John Ahlroos / IT Mill Oy Ltd 2010
  */
-@ClientWidget(VEventTimelineWidget.class)
+@ClientWidget(value = VEventTimelineWidget.class, loadStyle = LoadStyle.EAGER)
 @SuppressWarnings({ "serial" })
 public class EventTimeline extends AbstractComponent {
 

@@ -36,7 +36,7 @@
   </organization>
 
   <properties>
-    <vaadinVersion>6.6.6</vaadinVersion>
+    <vaadinVersion>6.7.1</vaadinVersion>
     <gwtVersion>2.3.0</gwtVersion>
     <gwtModule>
       com.spaceapplications.vaadin.addon.eventtimeline.gwt.EventTimelineWidgetSet
