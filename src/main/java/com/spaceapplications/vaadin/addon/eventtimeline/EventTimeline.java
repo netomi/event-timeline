@@ -17,6 +17,8 @@ import java.util.Map;
 
 import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEvent;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEventProvider;
+import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEventProvider.EventSetChange;
+import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEventProvider.EventSetChangeListener;
 import com.spaceapplications.vaadin.addon.eventtimeline.gwt.client.VEventTimelineWidget;
 import com.vaadin.terminal.PaintException;
 import com.vaadin.terminal.PaintTarget;
@@ -33,7 +35,7 @@ import com.vaadin.ui.ClientWidget.LoadStyle;
  */
 @ClientWidget(value = VEventTimelineWidget.class, loadStyle = LoadStyle.EAGER)
 @SuppressWarnings({ "serial" })
-public class EventTimeline extends AbstractComponent {
+public class EventTimeline extends AbstractComponent implements EventSetChangeListener {
 
   // The style name
   private static final String STYLENAME = "v-eventtimeline";
@@ -869,9 +871,29 @@ public class EventTimeline extends AbstractComponent {
 
     sendBandCaptions = true;
 
+    provider.addListener(this);
+    
     if (initDone) {
       requestRepaint();
     }
+  }
+
+  @Override
+  public void eventSetChange(EventSetChange changeEvent) {
+    TimelineEventProvider provider = changeEvent.getProvider();
+    List<TimelineEvent> events = provider.getEvents(minDate, maxDate);
+    int idx = 0;
+    for (TimelineEventProvider p : eventProviders) {
+      if (p.equals(provider)) {
+        break;
+      }
+      idx++;
+    }
+    
+    eventsToSend.put(idx, events);
+    eventsStartTime = minDate;
+    eventsEndTime = maxDate;
+    requestRepaint();
   }
 
   /**

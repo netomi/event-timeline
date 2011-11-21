@@ -4,8 +4,11 @@
 package com.spaceapplications.vaadin.addon.eventtimeline.event;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * <p>
@@ -24,7 +27,12 @@ public class BasicEventProvider implements TimelineEventProvider,
 
   private static final long serialVersionUID = 1L;
 
-  protected List<TimelineEvent> eventList = new ArrayList<TimelineEvent>();
+  protected Set<TimelineEvent> eventList = new TreeSet<TimelineEvent>(new Comparator<TimelineEvent>() {
+    @Override
+    public int compare(TimelineEvent o1, TimelineEvent o2) {
+      return o1.getStart().compareTo(o2.getStart());
+    }
+  });
 
   private List<EventSetChangeListener> listeners = new ArrayList<EventSetChangeListener>();
 

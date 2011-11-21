@@ -601,7 +601,11 @@ public class VEventTimelineDisplay extends Widget implements VDataListener, Mous
       Long startTime = currentStartDate.getTime();
       Long endTime = currentEndDate.getTime();
       int slots = checkOverlaps(events, startTime, endTime);
-      maxSlots.add(band, slots);
+      if (maxSlots.size() > band) {
+        maxSlots.set(band, slots);
+      } else {
+        maxSlots.add(band, slots);
+      }
     }
   }
 

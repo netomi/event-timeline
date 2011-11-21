@@ -749,6 +749,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
       
       display.dataReceivedAll();
       browser.dataReceivedAll();
+      
+      display.redraw();
     }
 
     setDirty(uidl);

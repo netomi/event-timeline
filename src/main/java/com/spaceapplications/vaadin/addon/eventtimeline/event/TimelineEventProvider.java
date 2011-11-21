@@ -33,6 +33,10 @@ public interface TimelineEventProvider extends Serializable {
    */
   public List<TimelineEvent> getEvents(Date startDate, Date endDate);
 
+  public void addListener(EventSetChangeListener listener);
+
+  public void removeListener(EventSetChangeListener listener);
+
   /**
    * Event to signal that the set of events has changed and the calendar
    * should refresh its view from the {@link TimelineEventProvider}.
