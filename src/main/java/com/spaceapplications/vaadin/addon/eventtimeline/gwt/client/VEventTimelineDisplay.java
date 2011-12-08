@@ -552,8 +552,8 @@ public class VEventTimelineDisplay extends Widget implements VDataListener, Mous
   }
 
   public boolean overlaps(VEvent evt1, VEvent evt2) {
-    if ((evt1.getStartTime() > evt2.getStartTime() && evt1.getStartTime() < evt2.getEndTime())
-        || (evt2.getStartTime() > evt1.getStartTime() && evt2.getStartTime() < evt1.getEndTime())) {
+    if ((evt1.getStartTime() >= evt2.getStartTime() && evt1.getStartTime() <= evt2.getEndTime())
+        || (evt2.getStartTime() >= evt1.getStartTime() && evt2.getStartTime() <= evt1.getEndTime())) {
       return true;
     } else {
       return false;

@@ -30,7 +30,17 @@ public class BasicEventProvider implements TimelineEventProvider,
   protected Set<TimelineEvent> eventList = new TreeSet<TimelineEvent>(new Comparator<TimelineEvent>() {
     @Override
     public int compare(TimelineEvent o1, TimelineEvent o2) {
-      return o1.getStart().compareTo(o2.getStart());
+      int diff = o1.getStart().compareTo(o2.getStart());
+      if (diff != 0) {
+        return diff;
+      } else {
+        diff = o1.getEnd().compareTo(o2.getEnd());
+        if (diff != 0) {
+          return diff;
+        } else {
+          return o1.getEventId().compareTo(o2.getEventId());
+        }
+      }
     }
   });
 
