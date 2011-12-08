@@ -1,13 +1,16 @@
                                      EVENT TIMELINE
                                   Development Changelog
 
-Version 0.4.0 - xx.xx.2011
+Version 0.4.0 - 08.12.2011
 --------------------------
 
    - added maven build config
-   - fixed positioning of band adjuster
-   - band adjuster are only visible when hovering over the band area
+   - band adjuster is only visible when hovering over the band area
    - the grid color can now be set using CSS3 style rgba values
+   - bands automatically expand to maximum available height
+   - added first support for event updates
+   - events are correctly sorted according their start and end times (fixes issue #5)
+   - improved positioning of band adjuster (fixes issue #6)
  
 Version 0.3.0 - 16.09.2011
 --------------------------
