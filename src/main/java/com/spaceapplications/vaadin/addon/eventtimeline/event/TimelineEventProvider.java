@@ -32,7 +32,7 @@ public interface TimelineEventProvider extends Serializable {
    * @return List of events
    */
   public List<TimelineEvent> getEvents(Date startDate, Date endDate);
-
+  
   public void addListener(EventSetChangeListener listener);
 
   public void removeListener(EventSetChangeListener listener);

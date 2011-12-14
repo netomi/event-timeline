@@ -33,6 +33,9 @@ import com.vaadin.ui.Component;
  * 
  * @author Thomas Neidhart / Space Applications Services NV/SA
  * @author John Ahlroos / IT Mill Oy Ltd 2010
+ *         <p/>
+ *         Contributors:<br/>
+ *         Florian Pirchner <florian.pirchner@gmail.com> Add / remove bands
  */
 @ClientWidget(value = VEventTimelineWidget.class, loadStyle = LoadStyle.EAGER)
 @SuppressWarnings({ "serial" })
@@ -42,11 +45,7 @@ public class EventTimeline extends AbstractComponent implements
 	// The style name
 	private static final String STYLENAME = "v-eventtimeline";
 
-	// Event providers
-	// protected List<TimelineEventProvider> eventProviders = new
-	// ArrayList<TimelineEventProvider>();
-
-	// Event band captions
+	// Event band information
 	private final List<BandInfo> bandInfos = new ArrayList<BandInfo>();
 	private final List<BandInfo> bandsToBeRemoved = new ArrayList<EventTimeline.BandInfo>();
 	private final List<BandInfo> bandsToBeAdded = new ArrayList<EventTimeline.BandInfo>();
@@ -252,7 +251,6 @@ public class EventTimeline extends AbstractComponent implements
 		}
 	}
 
-	// TODO
 	/**
 	 * Band paging event. This event is sent when a user selected the next /
 	 * previous band button.
@@ -661,7 +659,6 @@ public class EventTimeline extends AbstractComponent implements
 	private static final Method DATERANGE_CHANGED_METHOD;
 	private static final Method EVENT_CLICK_METHOD;
 
-	// TODO
 	private static final Method BAND_NAVIGATION_METHOD;
 
 	static {
@@ -673,7 +670,6 @@ public class EventTimeline extends AbstractComponent implements
 			EVENT_CLICK_METHOD = EventClickListener.class.getDeclaredMethod(
 					"eventClick", new Class[] { EventButtonClickEvent.class });
 
-			// TODO
 			BAND_NAVIGATION_METHOD = BandPagingListener.class
 					.getDeclaredMethod("requestNavigation",
 							new Class[] { BandPagingEvent.class });
@@ -724,8 +720,9 @@ public class EventTimeline extends AbstractComponent implements
 		}
 
 		// The client need some events to display
-		if (variables.containsKey("events")) {
-			Object[] indexes = (Object[]) variables.get("events");
+		if (variables.containsKey(VEventTimelineWidget.ATTR_EVENTS)) {
+			Object[] indexes = (Object[]) variables
+					.get(VEventTimelineWidget.ATTR_EVENTS);
 			Date start = new Date(Long.parseLong(indexes[0].toString()));
 			Date end = new Date(Long.parseLong(indexes[1].toString()));
 
@@ -744,7 +741,8 @@ public class EventTimeline extends AbstractComponent implements
 				eventsToSend.clear();
 			}
 
-			eventsToSend.putAll(getEvents(eventsStartTime, eventsEndTime));
+			eventsToSend
+					.putAll(getAllEventsMap(eventsStartTime, eventsEndTime));
 		}
 
 		// Send the data to the client
@@ -801,24 +799,27 @@ public class EventTimeline extends AbstractComponent implements
 
 		// Add the events
 		if (eventsToSend.size() > 0) {
-			target.startTag("events");
-			target.addAttribute("start", eventsStartTime.getTime());
-			target.addAttribute("end", eventsEndTime.getTime());
+			target.startTag(VEventTimelineWidget.ATTR_EVENTS);
+			target.addAttribute(VEventTimelineWidget.ATTR_START,
+					eventsStartTime.getTime());
+			target.addAttribute(VEventTimelineWidget.ATTR_END,
+					eventsEndTime.getTime());
 
 			for (Map.Entry<Integer, List<TimelineEvent>> entry : eventsToSend
 					.entrySet()) {
-				target.startTag("band");
-				target.addAttribute("bandid", entry.getKey());
+				target.startTag(VEventTimelineWidget.ATTR_BAND);
+				target.addAttribute(VEventTimelineWidget.ATTR_BANDID,
+						entry.getKey());
 				// target.addAttribute("events",
 				// getEventsAsStringArray(entry.getValue()));
 				for (TimelineEvent event : entry.getValue()) {
-					target.startTag("event");
+					target.startTag(VEventTimelineWidget.ATTR_EVENT);
 					paintEvent(event, target);
-					target.endTag("event");
+					target.endTag(VEventTimelineWidget.ATTR_EVENT);
 				}
-				target.endTag("band");
+				target.endTag(VEventTimelineWidget.ATTR_BAND);
 			}
-			target.endTag("events");
+			target.endTag(VEventTimelineWidget.ATTR_EVENTS);
 			eventsToSend.clear();
 			eventsStartTime = null;
 			eventsEndTime = null;
@@ -1105,7 +1106,6 @@ public class EventTimeline extends AbstractComponent implements
 	 * @param listener
 	 *            The listener to be added
 	 */
-	// TODO
 	public void addListener(BandPagingListener listener) {
 		addListener(BandPagingEvent.class, listener, BAND_NAVIGATION_METHOD);
 	}
@@ -1164,7 +1164,6 @@ public class EventTimeline extends AbstractComponent implements
 	 * @param page
 	 *            The visible page of the band area.
 	 */
-	// TODO
 	protected void fireBandPagingEvent(int page) {
 		fireEvent(new EventTimeline.BandPagingEvent(this, page));
 	}
@@ -1432,7 +1431,15 @@ public class EventTimeline extends AbstractComponent implements
 		}
 	}
 
-	private Map<Integer, List<TimelineEvent>> getEvents(Date start, Date end) {
+	/**
+	 * Returns a map with all events grouped by the bandId.
+	 * 
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	private Map<Integer, List<TimelineEvent>> getAllEventsMap(Date start,
+			Date end) {
 		Map<Integer, List<TimelineEvent>> events = new HashMap<Integer, List<TimelineEvent>>();
 
 		int idx = 0;
@@ -1467,31 +1474,63 @@ public class EventTimeline extends AbstractComponent implements
 		return this.dateFormatInfo;
 	}
 
+	/**
+	 * A helper class to paint band commands.
+	 */
 	private static class BandsPainter {
 
+		/**
+		 * Start tag {@link VEventTimelineWidget#ATTR_BANDS}
+		 * 
+		 * @param target
+		 * @throws PaintException
+		 */
 		public static void start(PaintTarget target) throws PaintException {
-			target.startTag("bands");
+			target.startTag(VEventTimelineWidget.ATTR_BANDS);
 		}
 
+		/**
+		 * End tag {@link VEventTimelineWidget#ATTR_BANDS}
+		 * 
+		 * @param target
+		 * @throws PaintException
+		 */
 		public static void end(PaintTarget target) throws PaintException {
-			target.endTag("bands");
+			target.endTag(VEventTimelineWidget.ATTR_BANDS);
 		}
 
+		/**
+		 * Paints the add band command.
+		 * 
+		 * @param target
+		 * @param bandId
+		 * @param caption
+		 * @throws PaintException
+		 */
 		public static void paintAdd(PaintTarget target, int bandId,
 				String caption) throws PaintException {
-			target.startTag("band");
-			target.addAttribute("bandid", bandId);
-			target.addAttribute("operation", "add");
-			target.addAttribute("bcaption", caption);
-			target.endTag("band");
+			target.startTag(VEventTimelineWidget.ATTR_BAND);
+			target.addAttribute(VEventTimelineWidget.ATTR_BANDID, bandId);
+			target.addAttribute(VEventTimelineWidget.ATTR_OPERATION,
+					VEventTimelineWidget.OPERATION_ADD);
+			target.addAttribute(VEventTimelineWidget.ATTR_BAND_CAPTION, caption);
+			target.endTag(VEventTimelineWidget.ATTR_BAND);
 		}
 
+		/**
+		 * Paints the remove band command.
+		 * 
+		 * @param target
+		 * @param bandId
+		 * @throws PaintException
+		 */
 		public static void paintRemove(PaintTarget target, int bandId)
 				throws PaintException {
-			target.startTag("band");
-			target.addAttribute("bandid", bandId);
-			target.addAttribute("operation", "remove");
-			target.endTag("band");
+			target.startTag(VEventTimelineWidget.ATTR_BAND);
+			target.addAttribute(VEventTimelineWidget.ATTR_BANDID, bandId);
+			target.addAttribute(VEventTimelineWidget.ATTR_OPERATION,
+					VEventTimelineWidget.OPERATION_REMOVE);
+			target.endTag(VEventTimelineWidget.ATTR_BAND);
 		}
 
 	}

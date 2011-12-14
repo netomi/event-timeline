@@ -8,10 +8,11 @@ import com.spaceapplications.vaadin.addon.eventtimeline.EventTimeline;
 import com.spaceapplications.vaadin.addon.eventtimeline.EventTimeline.BandInfo;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.BasicEvent;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.BasicEventProvider;
+import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEvent;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEventProvider;
 import com.vaadin.Application;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Window;
 
 public class SimpleEventTimelineDemo extends Application {
@@ -22,11 +23,24 @@ public class SimpleEventTimelineDemo extends Application {
 
 		setMainWindow(mainWindow);
 
+		HorizontalLayout buttons = new HorizontalLayout();
+		buttons.setSpacing(true);
 		Button addBandButton = new Button("Add band");
-		mainWindow.addComponent(addBandButton);
+		buttons.addComponent(addBandButton);
 
 		Button removeLastBand = new Button("Remove last band");
-		mainWindow.addComponent(removeLastBand);
+		buttons.addComponent(removeLastBand);
+
+		Button addEventToLastBand = new Button("Add new event...");
+		addEventToLastBand.setDescription("...to last band");
+		buttons.addComponent(addEventToLastBand);
+
+		Button removeFirstEventFromLastBand = new Button(
+				"Remove first event...");
+		removeFirstEventFromLastBand.setDescription("...from last band");
+		buttons.addComponent(removeFirstEventFromLastBand);
+
+		mainWindow.addComponent(buttons);
 
 		// create the timeline
 		final EventTimeline timeline = new EventTimeline("Our event timeline");
@@ -34,8 +48,8 @@ public class SimpleEventTimelineDemo extends Application {
 		timeline.setWidth("100%");
 
 		// set the visible time range
-		Calendar cal = Calendar.getInstance();
-		Date start = cal.getTime();
+		final Calendar cal = Calendar.getInstance();
+		final Date start = cal.getTime();
 		cal.add(Calendar.HOUR_OF_DAY, 4);
 		final Date end = cal.getTime();
 		timeline.setVisibleDateRange(start, end);
@@ -52,7 +66,7 @@ public class SimpleEventTimelineDemo extends Application {
 
 		addBandButton.addListener(new Button.ClickListener() {
 			@Override
-			public void buttonClick(ClickEvent event) {
+			public void buttonClick(Button.ClickEvent event) {
 				timeline.addEventBand(String.format("Band %d", timeline
 						.getBandInfos().size() + 1),
 						createEventProviderAdditional(end));
@@ -61,11 +75,54 @@ public class SimpleEventTimelineDemo extends Application {
 
 		removeLastBand.addListener(new Button.ClickListener() {
 			@Override
-			public void buttonClick(ClickEvent event) {
+			public void buttonClick(Button.ClickEvent event) {
 				List<BandInfo> infos = timeline.getBandInfos();
 				if (infos.size() > 0) {
 					timeline.removeEventBand(infos.get(infos.size() - 1)
 							.getProvider());
+				}
+			}
+		});
+
+		addEventToLastBand.addListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(Button.ClickEvent event) {
+				List<BandInfo> infos = timeline.getBandInfos();
+				if (infos.size() > 0) {
+					BasicEventProvider provider = (BasicEventProvider) infos
+							.get(infos.size() - 1).getProvider();
+					List<TimelineEvent> events = provider.getEvents(start, end);
+					// create a simple event
+					BasicEvent result = new BasicEvent();
+					result.setEventId(String.valueOf(events.size() + 1));
+
+					// set the timestamp property
+					result.setStart(cal.getTime());
+					cal.add(Calendar.MINUTE, 10);
+					result.setEnd(cal.getTime());
+					// set the caption
+					result.setCaption("Event");
+					// style the event
+					result.setStyleName("color4");
+
+					provider.addEvent(result);
+					cal.add(Calendar.MINUTE, 4);
+				}
+			}
+		});
+
+		removeFirstEventFromLastBand.addListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(Button.ClickEvent event) {
+				List<BandInfo> infos = timeline.getBandInfos();
+				if (infos.size() > 0) {
+					BasicEventProvider provider = (BasicEventProvider) infos
+							.get(infos.size() - 1).getProvider();
+					List<TimelineEvent> events = provider.getEvents(start, end);
+					if (events.size() > 0) {
+						BasicEvent result = (BasicEvent) events.get(0);
+						provider.removeEvent(result);
+					}
 				}
 			}
 		});

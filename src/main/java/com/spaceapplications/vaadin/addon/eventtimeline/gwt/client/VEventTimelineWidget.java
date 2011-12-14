@@ -41,6 +41,9 @@ import com.vaadin.terminal.gwt.client.VConsole;
  * @author Thomas Neidhart / Space Applications Services NV/SA
  * @author Peter Lehto / IT Mill Oy Ltd
  * @author John Ahlroos / IT Mill Oy Ltd
+ *         <p/>
+ *         Contributors:<br/>
+ *         Florian Pirchner <florian.pirchner@gmail.com> Add / remove bands
  */
 public class VEventTimelineWidget extends Composite implements Paintable {
 
@@ -83,6 +86,18 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	public static final String ATTR_DATEFROM = "dfrom";
 	public static final String ATTR_CAPTION = "caption";
 	public static final String ATTR_ID = "id";
+
+	public static final String ATTR_EVENT = "event";
+	public static final String ATTR_BANDID = "bandid";
+	public static final String ATTR_BAND = "band";
+	public static final String ATTR_END = "end";
+	public static final String ATTR_START = "start";
+	public static final String ATTR_EVENTS = "events";
+	public static final String ATTR_BAND_CAPTION = "bcaption";
+	public static final String ATTR_OPERATION = "operation";
+	public static final String ATTR_BANDS = "bands";
+	public static final String OPERATION_REMOVE = "remove";
+	public static final String OPERATION_ADD = "add";
 
 	private final ClickHandler zoomClickHandler = new ClickHandler() {
 		public void onClick(ClickEvent event) {
@@ -166,7 +181,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private VClientCache cache = new VClientCache(this);
 
 	// Band Navigation
-	// TODO
 	private short bandPage = 1;
 	private HorizontalPanel bandNavigationBar;
 	private Anchor previousBands;
@@ -301,7 +315,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 		//
 		// band navigation area
-		// TODO
 		//
 		bandNavigationBar = new HorizontalPanel();
 		bandNavigationBar.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
@@ -447,7 +460,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	 * A band navigation was clicked
 	 * 
 	 * @param evt
-	 *            The click event TODO event
+	 *            The click event
 	 */
 	private void bandNavigationClicked(ClickEvent evt) {
 		if (evt.getSource() == nextBands) {
@@ -501,7 +514,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setSelectionLock(uidl);
 		setSelectionRange(uidl);
 
-		setBandCaption(uidl);
+		setBands(uidl);
 
 		handleOnePointGraph();
 
@@ -738,19 +751,26 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		}
 	}
 
-	private void setBandCaption(UIDL uidl) {
-		UIDL bands = uidl.getChildByTagName("bands");
+	/**
+	 * Sets the bands that should be shown. The uidl contains information
+	 * whether bands are added or removed.
+	 * 
+	 * @param uidl
+	 */
+	private void setBands(UIDL uidl) {
+		UIDL bands = uidl.getChildByTagName(ATTR_BANDS);
 		if (bands != null) {
 			Iterator<Object> it = bands.getChildIterator();
 			while (it.hasNext()) {
 				UIDL child = (UIDL) it.next();
-				if (child != null && "band".equals(child.getTag())) {
-					Integer id = child.getIntAttribute("bandid");
+				if (child != null && ATTR_BAND.equals(child.getTag())) {
+					Integer id = child.getIntAttribute(ATTR_BANDID);
 					String operation = child.getStringAttribute("operation");
-					if (operation.equals("add")) {
-						String caption = child.getStringAttribute("bcaption");
+					if (operation.equals(OPERATION_ADD)) {
+						String caption = child
+								.getStringAttribute(ATTR_BAND_CAPTION);
 						bandArea.addBand(id, caption);
-					} else if (operation.equals("remove")) {
+					} else if (operation.equals(OPERATION_REMOVE)) {
 						bandArea.removeBand(id);
 					}
 				}
@@ -817,7 +837,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		}
 
 		setCaption(uidl);
-		setBandCaption(uidl);
+		setBands(uidl);
 		setLocale(uidl);
 		setNoData(uidl);
 		setSelectionLock(uidl);
@@ -1234,8 +1254,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 	/**
 	 * Fires a event band navigation click event
-	 * 
-	 * TODO event
 	 */
 	public void fireBandNavigationClickEvent() {
 		client.updateVariable(uidlId, "bandPage", bandPage, true);

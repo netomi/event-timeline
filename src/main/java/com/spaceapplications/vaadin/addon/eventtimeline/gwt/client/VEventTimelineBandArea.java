@@ -18,6 +18,9 @@ import com.google.gwt.user.client.ui.Widget;
  * VEventTimelineBandArea.
  * 
  * @author Thomas Neidhart / Space Applications Services NV/SA
+ *         <p/>
+ *         Contributors:<br/>
+ *         Florian Pirchner <florian.pirchner@gmail.com> Add / remove bands
  */
 public class VEventTimelineBandArea extends VerticalPanel implements
 		MouseOverHandler, MouseOutHandler {
@@ -128,21 +131,6 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	public int getBandCount() {
 		return bands.size();
 	}
-
-	// public void setCaptions(final String[] captions) {
-	// int bandId = 0;
-	//
-	// for (String caption : captions) {
-	// // the minimum band height
-	// // TODO: make this configurable through the widget
-	//
-	//
-	// Widget band = new VEventTimelineBand(bandId++, caption, this);
-	// add(band);
-	//
-	//
-	// }
-	// }
 
 	public int getBandHeight(int band) {
 		return getWidget(band).getOffsetHeight();
