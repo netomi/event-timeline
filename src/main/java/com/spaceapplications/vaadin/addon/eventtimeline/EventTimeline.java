@@ -36,7 +36,7 @@ import com.vaadin.ui.ClientWidget.LoadStyle;
 @ClientWidget(value = VEventTimelineWidget.class, loadStyle = LoadStyle.EAGER)
 @SuppressWarnings({ "serial" })
 public class EventTimeline extends AbstractComponent implements EventSetChangeListener {
-
+ 
   // The style name
   private static final String STYLENAME = "v-eventtimeline";
 
