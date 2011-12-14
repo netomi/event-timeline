@@ -19,111 +19,172 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Thomas Neidhart / Space Applications Services NV/SA
  */
-public class VEventTimelineBandArea extends VerticalPanel implements MouseOverHandler,
-    MouseOutHandler {
+public class VEventTimelineBandArea extends VerticalPanel implements
+		MouseOverHandler, MouseOutHandler {
 
-  private final VEventTimelineWidget timelineWidget;
+	private final VEventTimelineWidget timelineWidget;
 
-  private HandlerRegistration mouseOverReg, mouseOutReg;
+	private HandlerRegistration mouseOverReg, mouseOutReg;
 
-  // Band captions
-  private final List<Integer> bandMinimumHeights = new ArrayList<Integer>();
+	// Band captions
+	private final List<Integer> bandMinimumHeights = new ArrayList<Integer>();
 
-  public VEventTimelineBandArea(VEventTimelineWidget tw) {
-    timelineWidget = tw;
-  }
+	private final List<VEventTimelineBand> bands = new ArrayList<VEventTimelineBand>();
 
-  @Override
-  protected void onLoad() {
-    super.onLoad();
-    mouseOverReg = addDomHandler(this, MouseOverEvent.getType());
-    mouseOutReg = addDomHandler(this, MouseOutEvent.getType());
-  }
+	public VEventTimelineBandArea(VEventTimelineWidget tw) {
+		timelineWidget = tw;
+	}
 
-  @Override
-  protected void onUnload() {
-    super.onUnload();
-    if (mouseOverReg != null) {
-      mouseOverReg.removeHandler();
-      mouseOverReg = null;
-    }
-    if (mouseOutReg != null) {
-      mouseOutReg.removeHandler();
-      mouseOutReg = null;
-    }
-  }
+	@Override
+	protected void onLoad() {
+		super.onLoad();
+		mouseOverReg = addDomHandler(this, MouseOverEvent.getType());
+		mouseOutReg = addDomHandler(this, MouseOutEvent.getType());
+	}
 
-  @Override
-  public void onMouseOut(MouseOutEvent event) {
-    for (Widget w : getChildren()) {
-      ((VEventTimelineBand) w).disableAdjuster();
-    }
-  }
+	@Override
+	protected void onUnload() {
+		super.onUnload();
+		if (mouseOverReg != null) {
+			mouseOverReg.removeHandler();
+			mouseOverReg = null;
+		}
+		if (mouseOutReg != null) {
+			mouseOutReg.removeHandler();
+			mouseOutReg = null;
+		}
+	}
 
-  @Override
-  public void onMouseOver(MouseOverEvent event) {
-    for (Widget w : getChildren()) {
-      ((VEventTimelineBand) w).enableAdjuster();
-    }
-  }
+	@Override
+	public void onMouseOut(MouseOutEvent event) {
+		for (Widget w : getChildren()) {
+			((VEventTimelineBand) w).disableAdjuster();
+		}
+	}
 
-  public void setCaptions(final String[] captions) {
-    int bandId = 0;
-    int bandHeight = (getParent().getOffsetHeight() - timelineWidget.getBrowserHeight() - 16) / captions.length;
-    for (String caption : captions) {
-      // the minimum band height
-      // TODO: make this configurable through the widget
-      bandMinimumHeights.add(20);
+	@Override
+	public void onMouseOver(MouseOverEvent event) {
+		for (Widget w : getChildren()) {
+			((VEventTimelineBand) w).enableAdjuster();
+		}
+	}
 
-      Widget band = new VEventTimelineBand(bandId++, caption, this);
-      add(band);
+	/**
+	 * Is called to add an event band.
+	 * 
+	 * @param id
+	 * @param caption
+	 */
+	public void addBand(int id, String caption) {
+		VEventTimelineBand band = new VEventTimelineBand(id, caption, this);
+		add(band);
+		bands.add(band);
 
-      // TODO: currently the band heights are set to default 45 px -> make configurable
-      band.setHeight(bandHeight + "px");
-      band.setWidth(100 + "px");
-    }
-  }
+		// TODO: currently the band heights are set to default 45 px -> make
+		// configurable
+		bandMinimumHeights.add(20);
+		int bandHeight = (getParent().getOffsetHeight()
+				- timelineWidget.getBrowserHeight() - 16)
+				/ bands.size();
+		for (VEventTimelineBand existingBand : bands) {
+			existingBand.setHeight(bandHeight + "px");
+			existingBand.setWidth(100 + "px");
+		}
+	}
 
-  public int getBandHeight(int band) {
-    return getWidget(band).getOffsetHeight();
-  }
+	/**
+	 * Is called to remove the event band with the given id.
+	 * 
+	 * @param id
+	 */
+	public void removeBand(int id) {
+		int index = -1;
+		for (VEventTimelineBand band : bands) {
+			if (band.getId() == id) {
+				index = bands.indexOf(band);
+				remove(band);
+				bands.remove(band);
+				break;
+			}
+		}
 
-  public boolean requestResize(int bandId, int oldHeight, int adjustment) {
-    int minimumHeight = bandMinimumHeights.get(bandId);
-    int newHeight = oldHeight + adjustment;
-    if (newHeight < minimumHeight) {
-      return false;
-    }
+		if (index >= 0) {
+			bandMinimumHeights.remove(index);
+		}
+		int bandHeight = (getParent().getOffsetHeight()
+				- timelineWidget.getBrowserHeight() - 16)
+				/ bands.size();
+		for (VEventTimelineBand existingBand : bands) {
+			existingBand.setHeight(bandHeight + "px");
+			existingBand.setWidth(100 + "px");
+		}
+	}
 
-    // maximum height of the parent widget
-    int maxHeight = getParent().getOffsetHeight() - timelineWidget.getBrowserHeight() - 16;
+	/**
+	 * Returns the number of bands.
+	 * 
+	 * @return
+	 */
+	public int getBandCount() {
+		return bands.size();
+	}
 
-    int totalHeight = 0;
-    for (int idx = 0; idx < getWidgetCount(); idx++) {
-      VEventTimelineBand w = (VEventTimelineBand) getWidget(idx);
-      if (idx != bandId) {
-        totalHeight += w.getHeight();
-      } else {
-        totalHeight += newHeight;
-      }
-    }
+	// public void setCaptions(final String[] captions) {
+	// int bandId = 0;
+	//
+	// for (String caption : captions) {
+	// // the minimum band height
+	// // TODO: make this configurable through the widget
+	//
+	//
+	// Widget band = new VEventTimelineBand(bandId++, caption, this);
+	// add(band);
+	//
+	//
+	// }
+	// }
 
-    if (totalHeight > maxHeight) {
-      newHeight -= totalHeight - maxHeight;
-      if (newHeight < oldHeight) {
-        return false;
-      }
-    }
+	public int getBandHeight(int band) {
+		return getWidget(band).getOffsetHeight();
+	}
 
-    getWidget(bandId).setHeight(newHeight + "px");
+	public boolean requestResize(int bandId, int oldHeight, int adjustment) {
+		int minimumHeight = bandMinimumHeights.get(bandId);
+		int newHeight = oldHeight + adjustment;
+		if (newHeight < minimumHeight) {
+			return false;
+		}
 
-    for (Widget w : getChildren()) {
-      ((VEventTimelineBand) w).updateBandAdjuster();
-    }
-    return true;
-  }
+		// maximum height of the parent widget
+		int maxHeight = getParent().getOffsetHeight()
+				- timelineWidget.getBrowserHeight() - 16;
 
-  public void redraw() {
-    timelineWidget.redrawDisplay();
-  }
+		int totalHeight = 0;
+		for (int idx = 0; idx < getWidgetCount(); idx++) {
+			VEventTimelineBand w = (VEventTimelineBand) getWidget(idx);
+			if (idx != bandId) {
+				totalHeight += w.getHeight();
+			} else {
+				totalHeight += newHeight;
+			}
+		}
+
+		if (totalHeight > maxHeight) {
+			newHeight -= totalHeight - maxHeight;
+			if (newHeight < oldHeight) {
+				return false;
+			}
+		}
+
+		getWidget(bandId).setHeight(newHeight + "px");
+
+		for (Widget w : getChildren()) {
+			((VEventTimelineBand) w).updateBandAdjuster();
+		}
+		return true;
+	}
+
+	public void redraw() {
+		timelineWidget.redrawDisplay();
+	}
 }

@@ -23,201 +23,219 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Thomas Neidhart / Space Applications Services NV/SA
  */
-public class VEventTimelineBand extends Widget implements MouseDownHandler, MouseMoveHandler,
-    MouseUpHandler, NativePreviewHandler {
+public class VEventTimelineBand extends Widget implements MouseDownHandler,
+		MouseMoveHandler, MouseUpHandler, NativePreviewHandler {
 
-  private static final String CLASSNAME_BAND = VEventTimelineWidget.CLASSNAME + "-band";
-  private static final String CLASSNAME_BAND_LABEL = CLASSNAME_BAND + "-label";
-  private static final String CLASSNAME_BAND_ADJUSTER = "v-band-adjuster";
+	private static final String CLASSNAME_BAND = VEventTimelineWidget.CLASSNAME
+			+ "-band";
+	private static final String CLASSNAME_BAND_LABEL = CLASSNAME_BAND
+			+ "-label";
+	private static final String CLASSNAME_BAND_ADJUSTER = "v-band-adjuster";
 
-  private final Element bandRoot;
+	private final Element bandRoot;
 
-  private final Element bandLabel;
-  private final Element bandAdjuster;
+	private final Element bandLabel;
+	private final Element bandAdjuster;
 
-  private boolean mouseDown;
-  private boolean mouseIsActive = false;
+	private boolean mouseDown;
+	private boolean mouseIsActive = false;
 
-  private boolean sizeAdjust;
+	private boolean sizeAdjust;
 
-  private int dragStartY;
+	private int dragStartY;
 
-  private HandlerRegistration mouseMoveReg, mouseUpReg, mouseDownReg, preview;
+	private HandlerRegistration mouseMoveReg, mouseUpReg, mouseDownReg,
+			preview;
 
-  private int bandId;
-  private VEventTimelineBandArea bandArea;
+	private int bandId;
+	private VEventTimelineBandArea bandArea;
 
-  public VEventTimelineBand(int bandId, final String caption, final VEventTimelineBandArea bandArea) {
-    this.bandId = bandId;
-    this.bandArea = bandArea;
+	public VEventTimelineBand(int bandId, final String caption,
+			final VEventTimelineBandArea bandArea) {
+		this.bandId = bandId;
+		this.bandArea = bandArea;
 
-    bandRoot = DOM.createDiv();
-    setElement(bandRoot);
+		bandRoot = DOM.createDiv();
+		setElement(bandRoot);
 
-    setStyleName(CLASSNAME_BAND);
+		setStyleName(CLASSNAME_BAND);
 
-    bandLabel = DOM.createDiv();
-    bandLabel.setClassName(CLASSNAME_BAND_LABEL);
-    bandLabel.setInnerText(caption);
-    bandRoot.appendChild(bandLabel);
+		bandLabel = DOM.createDiv();
+		bandLabel.setClassName(CLASSNAME_BAND_LABEL);
+		bandLabel.setInnerText(caption);
+		bandRoot.appendChild(bandLabel);
 
-    bandAdjuster = DOM.createDiv();
-    bandAdjuster.setClassName(CLASSNAME_BAND_ADJUSTER);
-    bandRoot.appendChild(bandAdjuster);
-  }
+		bandAdjuster = DOM.createDiv();
+		bandAdjuster.setClassName(CLASSNAME_BAND_ADJUSTER);
+		bandRoot.appendChild(bandAdjuster);
+	}
 
-  @Override
-  protected void onLoad() {
-    super.onLoad();
-    mouseDownReg = addDomHandler(this, MouseDownEvent.getType());
-    mouseUpReg = addDomHandler(this, MouseUpEvent.getType());
-    mouseMoveReg = addDomHandler(this, MouseMoveEvent.getType());
-    preview = Event.addNativePreviewHandler(this);
-    
-    disableAdjuster();
-  }
+	@Override
+	protected void onLoad() {
+		super.onLoad();
+		mouseDownReg = addDomHandler(this, MouseDownEvent.getType());
+		mouseUpReg = addDomHandler(this, MouseUpEvent.getType());
+		mouseMoveReg = addDomHandler(this, MouseMoveEvent.getType());
+		preview = Event.addNativePreviewHandler(this);
 
-  @Override
-  protected void onUnload() {
-    super.onUnload();
-    if (mouseDownReg != null) {
-      mouseDownReg.removeHandler();
-      mouseDownReg = null;
-    }
-    if (mouseUpReg != null) {
-      mouseUpReg.removeHandler();
-      mouseUpReg = null;
-    }
-    if (mouseMoveReg != null) {
-      mouseMoveReg.removeHandler();
-      mouseMoveReg = null;
-    }
-    if (preview != null) {
-      preview.removeHandler();
-      preview = null;
-    }
-  }
+		disableAdjuster();
+	}
 
-  @Override
-  public void setWidth(String width) {
-    super.setWidth(width);
-    updateBandAdjuster();
-  }
+	@Override
+	protected void onUnload() {
+		super.onUnload();
+		if (mouseDownReg != null) {
+			mouseDownReg.removeHandler();
+			mouseDownReg = null;
+		}
+		if (mouseUpReg != null) {
+			mouseUpReg.removeHandler();
+			mouseUpReg = null;
+		}
+		if (mouseMoveReg != null) {
+			mouseMoveReg.removeHandler();
+			mouseMoveReg = null;
+		}
+		if (preview != null) {
+			preview.removeHandler();
+			preview = null;
+		}
+	}
 
-  @Override
-  public void setHeight(String height) {
-    super.setHeight(height);
-    updateBandAdjuster();
-  }
+	@Override
+	public void setWidth(String width) {
+		super.setWidth(width);
+		updateBandAdjuster();
+	}
 
-  public int getHeight() {
-    return DOM.getIntStyleAttribute(bandRoot, "height");
-  }
-  
-  public void updateBandAdjuster() {
-    int center = bandRoot.getOffsetWidth() / 2 - 8;
-    DOM.setStyleAttribute(bandAdjuster, "left", center + "px");
+	@Override
+	public void setHeight(String height) {
+		super.setHeight(height);
+		updateBandAdjuster();
+	}
 
-    int bottom = bandRoot.getOffsetHeight() - bandLabel.getOffsetHeight() - 4;
+	public int getHeight() {
+		return DOM.getIntStyleAttribute(bandRoot, "height");
+	}
 
-    DOM.setStyleAttribute(bandAdjuster, "top", bottom + "px");
-  }
+	/**
+	 * Returns the id of that band.
+	 * 
+	 * @return the bandId
+	 */
+	public int getId() {
+		return bandId;
+	}
 
-  public void enableAdjuster() {
-    DOM.setStyleAttribute(bandAdjuster, "visibility", "visible");
-  }
-  
-  public void disableAdjuster() {
-    DOM.setStyleAttribute(bandAdjuster, "visibility", "hidden");
-  }
-  
-  public boolean isMouseOverSizeAdjuster(Event mouseEvent) {
-    Element mouseOver = (Element) Element.as(mouseEvent.getEventTarget());
-    return mouseOver == bandAdjuster;
-  }
+	public void updateBandAdjuster() {
+		int center = bandRoot.getOffsetWidth() / 2 - 8;
+		DOM.setStyleAttribute(bandAdjuster, "left", center + "px");
 
-  /**
-   * Checks if element exists in the browser
-   * 
-   * @param elem
-   *          The element
-   * @return True if the element exists, else false
-   */
-  public boolean hasElement(com.google.gwt.dom.client.Element elem) {
-    if (elem == getElement() || elem == bandRoot || elem == bandLabel || elem == bandAdjuster) {
-      return true;
-    } else {
-      return false;
-    }
-  }
+		int bottom = bandRoot.getOffsetHeight() - bandLabel.getOffsetHeight()
+				- 4;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.google.gwt.event.dom.client.MouseUpHandler#onMouseUp(com.google.gwt
-   * .event.dom.client.MouseUpEvent)
-   */
-  public void onMouseUp(MouseUpEvent event) {
-    mouseIsActive = false;
+		DOM.setStyleAttribute(bandAdjuster, "top", bottom + "px");
+	}
 
-    DOM.releaseCapture(bandRoot);
-    sizeAdjust = false;
+	public void enableAdjuster() {
+		DOM.setStyleAttribute(bandAdjuster, "visibility", "visible");
+	}
 
-    // redraw
-    bandArea.redraw();
-  }
+	public void disableAdjuster() {
+		DOM.setStyleAttribute(bandAdjuster, "visibility", "hidden");
+	}
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.google.gwt.event.dom.client.MouseMoveHandler#onMouseMove(com.google
-   * .gwt.event.dom.client.MouseMoveEvent)
-   */
-  public void onMouseMove(MouseMoveEvent event) {
-    NativeEvent mouseEvent = event.getNativeEvent();
+	public boolean isMouseOverSizeAdjuster(Event mouseEvent) {
+		Element mouseOver = (Element) Element.as(mouseEvent.getEventTarget());
+		return mouseOver == bandAdjuster;
+	}
 
-    if (mouseDown) {
-      int adjustment = mouseEvent.getClientY() - dragStartY;
-      if (sizeAdjust) {
-        if (bandArea.requestResize(bandId, getHeight(), adjustment)) {
-          dragStartY = mouseEvent.getClientY();
-        }
-      }
-    }
-  }
+	/**
+	 * Checks if element exists in the browser
+	 * 
+	 * @param elem
+	 *            The element
+	 * @return True if the element exists, else false
+	 */
+	public boolean hasElement(com.google.gwt.dom.client.Element elem) {
+		if (elem == getElement() || elem == bandRoot || elem == bandLabel
+				|| elem == bandAdjuster) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see com.google.gwt.event.dom.client.MouseDownHandler#onMouseDown(com.google
-   * .gwt.event.dom.client.MouseDownEvent)
-   */
-  public void onMouseDown(MouseDownEvent event) {
-    mouseIsActive = true;
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.google.gwt.event.dom.client.MouseUpHandler#onMouseUp(com.google.gwt
+	 * .event.dom.client.MouseUpEvent)
+	 */
+	public void onMouseUp(MouseUpEvent event) {
+		mouseIsActive = false;
 
-    NativeEvent mouseEvent = event.getNativeEvent();
-    event.preventDefault();
-    event.stopPropagation();
+		DOM.releaseCapture(bandRoot);
+		sizeAdjust = false;
 
-    DOM.setCapture(bandRoot);
+		// redraw
+		bandArea.redraw();
+	}
 
-    if (isMouseOverSizeAdjuster((Event) mouseEvent)) {
-      sizeAdjust = true;
-      dragStartY = mouseEvent.getClientY();
-    }
-  }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.google.gwt.event.dom.client.MouseMoveHandler#onMouseMove(com.google
+	 * .gwt.event.dom.client.MouseMoveEvent)
+	 */
+	public void onMouseMove(MouseMoveEvent event) {
+		NativeEvent mouseEvent = event.getNativeEvent();
 
-  public void onPreviewNativeEvent(NativePreviewEvent event) {
-    // Monitor mouse button state
-    if (event.getTypeInt() == Event.ONMOUSEUP
-        && event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
-      mouseDown = false;
-      if (mouseIsActive) {
-        onMouseUp(null);
-      }
-    } else if (event.getTypeInt() == Event.ONMOUSEDOWN
-        && event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
-      mouseDown = true;
-    }
-  }
+		if (mouseDown) {
+			int adjustment = mouseEvent.getClientY() - dragStartY;
+			if (sizeAdjust) {
+				if (bandArea.requestResize(bandId, getHeight(), adjustment)) {
+					dragStartY = mouseEvent.getClientY();
+				}
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.google.gwt.event.dom.client.MouseDownHandler#onMouseDown(com.google
+	 * .gwt.event.dom.client.MouseDownEvent)
+	 */
+	public void onMouseDown(MouseDownEvent event) {
+		mouseIsActive = true;
+
+		NativeEvent mouseEvent = event.getNativeEvent();
+		event.preventDefault();
+		event.stopPropagation();
+
+		DOM.setCapture(bandRoot);
+
+		if (isMouseOverSizeAdjuster((Event) mouseEvent)) {
+			sizeAdjust = true;
+			dragStartY = mouseEvent.getClientY();
+		}
+	}
+
+	public void onPreviewNativeEvent(NativePreviewEvent event) {
+		// Monitor mouse button state
+		if (event.getTypeInt() == Event.ONMOUSEUP
+				&& event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
+			mouseDown = false;
+			if (mouseIsActive) {
+				onMouseUp(null);
+			}
+		} else if (event.getTypeInt() == Event.ONMOUSEDOWN
+				&& event.getNativeEvent().getButton() == NativeEvent.BUTTON_LEFT) {
+			mouseDown = true;
+		}
+	}
 }
