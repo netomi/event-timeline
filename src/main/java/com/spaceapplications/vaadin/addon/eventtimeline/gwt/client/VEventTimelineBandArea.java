@@ -3,6 +3,8 @@
  */
 package com.spaceapplications.vaadin.addon.eventtimeline.gwt.client;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,11 +36,9 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	private final List<VEventTimelineBand> allBands = new ArrayList<VEventTimelineBand>();
 	private final List<VEventTimelineBand> visibleBands = new ArrayList<VEventTimelineBand>();
 
-	// a pointer that indicates the first visible band in the page. Its value is
-	// the index of allBands-list
-	private short pagePointer;
-
 	private int pageSize = -1;
+
+	private int pageNumber;
 
 	public VEventTimelineBandArea(VEventTimelineWidget tw) {
 		timelineWidget = tw;
@@ -79,7 +79,8 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	}
 
 	/**
-	 * Is called to add an event band.
+	 * Is called to add an event band. Do not miss to navigate to the requested
+	 * page. For performance issues this is not done automatically.
 	 * 
 	 * @param id
 	 * @param caption
@@ -91,20 +92,38 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		// TODO: currently the band heights are set to default 45 px -> make
 		// configurable
 		bandMinimumHeights.add(20);
+	}
 
-		requestBandPage(pagePointer, pageSize);
+	/**
+	 * Returns the page number that contains the given band. If the band is not
+	 * part of the available bands then -1 is returned.
+	 * 
+	 * @param band
+	 * @return
+	 */
+	protected int getContainingPage(VEventTimelineBand band) {
+		int indexOf = allBands.indexOf(band);
+		if (indexOf < 0) {
+			return -1;
+		}
+
+		if (this.pageSize <= 0) {
+			return 0;
+		}
+
+		return indexOf / pageSize;
 	}
 
 	/**
 	 * Requests the build of the visible page.
 	 * 
-	 * @param pagePointer
+	 * @param firstBandInPageIndex
 	 *            The first band in the page. The value is the index of the band
 	 *            in allBands
 	 * @param pageSize
 	 *            The number of event bands visible in the band area
 	 */
-	protected void requestBandPage(short pagePointer, int pageSize) {
+	protected void requestBuildPage(int firstBandInPageIndex, int pageSize) {
 
 		// remove all bands
 		for (VEventTimelineBand band : visibleBands) {
@@ -116,7 +135,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		if (pageSize > 0) {
 			int height = calcHeight(pageSize);
 			for (int i = 0; i < pageSize; i++) {
-				int currentBandIndex = pagePointer + i;
+				int currentBandIndex = firstBandInPageIndex + i;
 				if (currentBandIndex > allBands.size() - 1) {
 					// end of allBands reached -> leave
 					break;
@@ -167,11 +186,11 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	 */
 	public void removeBand(int id) {
 		int index = -1;
-		for (VEventTimelineBand band : allBands) {
-			if (band.getId() == id) {
-				index = allBands.indexOf(band);
-				remove(band);
-				allBands.remove(band);
+		VEventTimelineBand band = null;
+		for (VEventTimelineBand temp : allBands) {
+			if (temp.getId() == id) {
+				index = allBands.indexOf(temp);
+				band = temp;
 				break;
 			}
 		}
@@ -179,13 +198,19 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		if (index >= 0) {
 			bandMinimumHeights.remove(index);
 		}
-		int bandHeight = (getParent().getOffsetHeight()
-				- timelineWidget.getBrowserHeight() - 16)
-				/ allBands.size();
-		for (VEventTimelineBand existingBand : allBands) {
-			existingBand.setHeight(bandHeight + "px");
-			existingBand.setWidth(100 + "px");
+
+		// remove the band
+		allBands.remove(band);
+		if (visibleBands.contains(band)) {
+			int page = getContainingPage(band);
+			remove(band);
+			visibleBands.remove(band);
+
+			if (page >= 0) {
+				setVisiblePage(page);
+			}
 		}
+
 	}
 
 	/**
@@ -197,8 +222,33 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		return allBands.size();
 	}
 
-	public int getBandHeight(int band) {
-		return getWidget(band).getOffsetHeight();
+	/**
+	 * Returns the height of the band.
+	 * 
+	 * @param bandId
+	 * @return
+	 */
+	public int getBandHeight(int bandId) {
+		VEventTimelineBand result = getBandById(bandId);
+		return result != null ? result.getHeight() : 0;
+	}
+
+	/**
+	 * Returns the band by its id or <code>null</code> if the band does not
+	 * exist.
+	 * 
+	 * @param bandId
+	 * @return
+	 */
+	protected VEventTimelineBand getBandById(int bandId) {
+		VEventTimelineBand result = null;
+		for (VEventTimelineBand band : allBands) {
+			if (band.getId() == bandId) {
+				result = band;
+				break;
+			}
+		}
+		return result;
 	}
 
 	public boolean requestResize(int bandId, int oldHeight, int adjustment) {
@@ -251,7 +301,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	public void setPageSize(int pageSize) {
 		this.pageSize = pageSize;
 
-		requestBandPage(pagePointer, pageSize);
+		setVisiblePage(0);
 	}
 
 	/**
@@ -265,4 +315,83 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		return pageSize;
 	}
 
+	/**
+	 * Returns the number of event band pages available.
+	 * 
+	 * @return
+	 */
+	public int getPageCount() {
+		if (allBands.size() == 0) {
+			return 0;
+		}
+
+		int pageSize = this.pageSize;
+		if (pageSize <= 0) {
+			pageSize = allBands.size();
+		}
+
+		BigDecimal bd = new BigDecimal((double) allBands.size() / pageSize);
+		return bd.setScale(0, RoundingMode.CEILING).intValue();
+	}
+
+	/**
+	 * Returns the number of the current page. The first page is 0.
+	 * 
+	 * @return the pageNumber
+	 */
+	public int getVisiblePage() {
+		return pageNumber;
+	}
+
+	/**
+	 * Sets the number of the current visible page<br/>
+	 * If the given number is &gt the maximum available page, the last page will
+	 * be shown.<br/>
+	 * The first page is 0.
+	 */
+	public void setVisiblePage(int pageNumber) {
+		if (pageNumber < 0) {
+			this.pageNumber = 0;
+		} else {
+			if (pageNumber > getPageCount() - 1) {
+				this.pageNumber = getPageCount() - 1;
+			} else {
+				this.pageNumber = pageNumber;
+			}
+		}
+
+		navigateToPage(pageNumber);
+	}
+
+	/**
+	 * Navigates to the page with the given number.
+	 * 
+	 * @param pageNumber
+	 */
+	public void navigateToPage(int pageNumber) {
+		if (pageNumber < 0) {
+			return;
+		}
+
+		int firstBandInPage = 0;
+		if (pageSize > 0) {
+			firstBandInPage = pageNumber * pageSize;
+		}
+		requestBuildPage(firstBandInPage, pageSize);
+	}
+
+	/**
+	 * Navigates to the band with the given id.
+	 * 
+	 * @param bandId
+	 */
+	public void navigateToBand(int bandId) {
+		VEventTimelineBand band = getBandById(bandId);
+		if (band != null) {
+			int containingPage = getContainingPage(band);
+			if (containingPage >= 0) {
+				setVisiblePage(containingPage);
+			}
+		}
+	}
 }

@@ -65,17 +65,16 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private static final String CLASSNAME_LEGEND = CLASSNAME + "-legend";
 	private static final String CLASSNAME_MODELEGEND_ROW = CLASSNAME
 			+ "-modelegend";
-
-	private static final String CLASSNAME_NAVIGATIONBAR = CLASSNAME
-			+ "-navigationbar";
-	private static final String CLASSNAME_NAVIGATIONBARLABEL = CLASSNAME
+	private static final String CLASSNAME_BANDPAGE = CLASSNAME
+			+ "-bandpagenavigation";
+	private static final String CLASSNAME_BANDPAGE_LABEL = CLASSNAME_BANDPAGE
 			+ "-label";
-
-	private static final String CLASSNAME_BANDPAGE = CLASSNAME + "-bandpage";
 	private static final String CLASSNAME_BANDPAGE_NEXT = CLASSNAME_BANDPAGE
 			+ "-next";
 	private static final String CLASSNAME_BANDPAGE_PREVIOUS = CLASSNAME_BANDPAGE
 			+ "-previous";
+	private static final String CLASSNAME_BANDPAGE_PAGENUMBER = CLASSNAME_BANDPAGE
+			+ "-pagenumber";
 
 	public static final String ATTR_DATE = "date";
 	public static final String ATTR_STYLE = "css";
@@ -158,9 +157,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private Date startDate = null;
 	private Date endDate = null;
 
-	// General properties
-	private int numBands;
-
 	// Zoom levels
 	private final Map<Anchor, Long> zoomLevels = new HashMap<Anchor, Long>();
 
@@ -182,11 +178,10 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private VClientCache cache = new VClientCache(this);
 
 	// Band Navigation
-	private short bandPage = 1;
 	private HorizontalPanel bandNavigationBar;
-	private Anchor previousBands;
+	private Anchor previousBandsPage;
 	private Label bandPageText;
-	private Anchor nextBands;
+	private Anchor nextBandsPage;
 
 	public VEventTimelineWidget() {
 
@@ -319,29 +314,32 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		//
 		bandNavigationBar = new HorizontalPanel();
 		bandNavigationBar.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
-		bandNavigationBar.setStyleName(CLASSNAME_NAVIGATIONBAR);
-		// bandNavigationBar.setWidth("100%");
+		bandNavigationBar.setStyleName(CLASSNAME_BANDPAGE);
+		// bandNavigationBar.setWidth("52px");
 		bandNavigationBar.setHeight("31px");
 		bandNavigationBar.setVisible(true);
-
-		Label navigationLbl = new Label("Navigation:");
-		navigationLbl.addStyleName(CLASSNAME_NAVIGATIONBARLABEL);
-		bandNavigationBar.add(navigationLbl);
 		topBar.add(bandNavigationBar);
 		topBar.setCellHorizontalAlignment(bandNavigationBar,
-				HorizontalPanel.ALIGN_LEFT);
+				HorizontalPanel.ALIGN_RIGHT);
 
-		previousBands = new Anchor("Previous page");
-		bandNavigationBar.add(previousBands);
-		previousBands.addClickHandler(bandNavigationClickHandler);
+		Label navigationLbl = new Label("Navigation:");
+		navigationLbl.addStyleName(CLASSNAME_BANDPAGE_LABEL);
+		bandNavigationBar.add(navigationLbl);
+
+		previousBandsPage = new Anchor("Previous page");
+		bandNavigationBar.add(previousBandsPage);
+		previousBandsPage.addStyleName(CLASSNAME_BANDPAGE_PREVIOUS);
+		previousBandsPage.addClickHandler(bandNavigationClickHandler);
 
 		bandPageText = new Label();
 		bandNavigationBar.add(bandPageText);
-		bandPageText.setText(Short.toString(bandPage));
+		bandPageText.addStyleName(CLASSNAME_BANDPAGE_PAGENUMBER);
+		bandPageText.setText("1");
 
-		nextBands = new Anchor("Next page");
-		bandNavigationBar.add(nextBands);
-		nextBands.addClickHandler(bandNavigationClickHandler);
+		nextBandsPage = new Anchor("Next page");
+		bandNavigationBar.add(nextBandsPage);
+		nextBandsPage.addStyleName(CLASSNAME_BANDPAGE_NEXT);
+		nextBandsPage.addClickHandler(bandNavigationClickHandler);
 
 		legend = new HorizontalPanel();
 		legend.setVisible(legendVisible);
@@ -464,19 +462,29 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	 *            The click event
 	 */
 	private void bandNavigationClicked(ClickEvent evt) {
-		if (evt.getSource() == nextBands) {
-			if (bandPage < numBands) {
+
+		boolean redraw = false;
+		int bandPage = bandArea.getVisiblePage();
+		if (evt.getSource() == nextBandsPage) {
+			if (bandPage < bandArea.getPageCount() - 1) {
 				bandPage++;
+				bandArea.setVisiblePage(bandPage);
+				redraw = true;
 			}
-			fireBandNavigationClickEvent();
 		} else {
-			if (bandPage > 1) {
+			if (bandPage > 0) {
 				bandPage--;
+				bandArea.setVisiblePage(bandPage);
+				redraw = true;
 			}
-			fireBandNavigationClickEvent();
 		}
 
-		bandPageText.setText(Short.toString(bandPage));
+		if (redraw) {
+			refreshPageNumber();
+			display.redraw();
+			browser.redraw();
+			fireBandNavigationClickEvent();
+		}
 	}
 
 	/**
@@ -765,6 +773,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			bandArea.setPageSize(pageSize);
 		}
 
+		boolean hasContent = bandArea.getBandCount() != 0;
 		UIDL bands = uidl.getChildByTagName(ATTR_BANDS);
 		if (bands != null) {
 			Iterator<Object> it = bands.getChildIterator();
@@ -777,6 +786,9 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 						String caption = child
 								.getStringAttribute(ATTR_BAND_CAPTION);
 						bandArea.addBand(id, caption);
+						if (hasContent) {
+							bandArea.navigateToBand(id);
+						}
 					} else if (operation.equals(OPERATION_REMOVE)) {
 						bandArea.removeBand(id);
 					}
@@ -784,12 +796,23 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			}
 		}
 
-		numBands = bandArea.getBandCount();
+		if (!hasContent) {
+			bandArea.navigateToPage(0);
+		}
+
+		refreshPageNumber();
 
 		if (initDone) {
 			display.redraw();
 			browser.redraw();
 		}
+	}
+
+	/**
+	 * Refreshes the page number.
+	 */
+	private void refreshPageNumber() {
+		bandPageText.setText(Integer.toString(bandArea.getVisiblePage() + 1));
 	}
 
 	protected int getBandHeight(int band) {
@@ -1005,7 +1028,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 		if (useCache) {
 			boolean gotFromCache = true;
-			for (int band = 0; band < numBands; band++) {
+			for (int band = 0; band < bandArea.getBandCount(); band++) {
 				List<VEvent> events = cache.getFromCache(band, startDate,
 						endDate);
 				if (events == null) {
@@ -1263,7 +1286,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	 * Fires a event band navigation click event
 	 */
 	public void fireBandNavigationClickEvent() {
-		client.updateVariable(uidlId, "bandPage", bandPage, true);
+		client.updateVariable(uidlId, "bandPage", bandArea.getVisiblePage(),
+				true);
 	}
 
 	/**
