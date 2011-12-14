@@ -894,6 +894,7 @@ public class EventTimeline extends AbstractComponent implements
 				bandsToBeAdded.clear();
 				BandsPainter.end(target);
 			}
+			sendBands = false;
 		}
 
 		// Send date formats if set
