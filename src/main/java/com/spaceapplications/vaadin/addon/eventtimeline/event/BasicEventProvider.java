@@ -25,7 +25,7 @@ import java.util.TreeSet;
 public class BasicEventProvider implements TimelineEventProvider,
     TimelineEventProvider.EventSetChangeNotifier, TimelineEvent.EventChangeListener {
 
-  private static final long serialVersionUID = 1L;
+     private static final long serialVersionUID = 1L;
 
   protected Set<TimelineEvent> eventList = new TreeSet<TimelineEvent>(new Comparator<TimelineEvent>() {
     @Override
