@@ -31,8 +31,14 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 
 	// Band captions
 	private final List<Integer> bandMinimumHeights = new ArrayList<Integer>();
+	private final List<VEventTimelineBand> allBands = new ArrayList<VEventTimelineBand>();
+	private final List<VEventTimelineBand> visibleBands = new ArrayList<VEventTimelineBand>();
 
-	private final List<VEventTimelineBand> bands = new ArrayList<VEventTimelineBand>();
+	// a pointer that indicates the first visible band in the page. Its value is
+	// the index of allBands-list
+	private short pagePointer;
+
+	private int pageSize = -1;
 
 	public VEventTimelineBandArea(VEventTimelineWidget tw) {
 		timelineWidget = tw;
@@ -80,19 +86,78 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	 */
 	public void addBand(int id, String caption) {
 		VEventTimelineBand band = new VEventTimelineBand(id, caption, this);
-		add(band);
-		bands.add(band);
+		allBands.add(band);
 
 		// TODO: currently the band heights are set to default 45 px -> make
 		// configurable
 		bandMinimumHeights.add(20);
-		int bandHeight = (getParent().getOffsetHeight()
-				- timelineWidget.getBrowserHeight() - 16)
-				/ bands.size();
-		for (VEventTimelineBand existingBand : bands) {
-			existingBand.setHeight(bandHeight + "px");
-			existingBand.setWidth(100 + "px");
+
+		requestBandPage(pagePointer, pageSize);
+	}
+
+	/**
+	 * Requests the build of the visible page.
+	 * 
+	 * @param pagePointer
+	 *            The first band in the page. The value is the index of the band
+	 *            in allBands
+	 * @param pageSize
+	 *            The number of event bands visible in the band area
+	 */
+	protected void requestBandPage(short pagePointer, int pageSize) {
+
+		// remove all bands
+		for (VEventTimelineBand band : visibleBands) {
+			remove(band);
+			band.setHeight("0px");
 		}
+		visibleBands.clear();
+
+		if (pageSize > 0) {
+			int height = calcHeight(pageSize);
+			for (int i = 0; i < pageSize; i++) {
+				int currentBandIndex = pagePointer + i;
+				if (currentBandIndex > allBands.size() - 1) {
+					// end of allBands reached -> leave
+					break;
+				}
+				VEventTimelineBand band = allBands.get(currentBandIndex);
+				band.setHeight(height + "px");
+				band.setWidth(100 + "px");
+
+				// add the band
+				add(band);
+				visibleBands.add(band);
+			}
+		} else {
+			int height = calcHeight(allBands.size());
+			for (VEventTimelineBand band : allBands) {
+				band.setHeight(height + "px");
+				band.setWidth(100 + "px");
+
+				// add the band
+				add(band);
+				visibleBands.add(band);
+			}
+		}
+	}
+
+	/**
+	 * Applies the bound to the event bands by calculating height and width.
+	 * 
+	 * @param pageSize
+	 *            The number of visible event bands
+	 */
+	protected int calcHeight(int pageSize) {
+		int bandHeight = 0;
+		int calcBase = pageSize <= 0 ? allBands.size() : pageSize;
+		if (calcBase > 0) {
+			bandHeight = (getParent().getOffsetHeight()
+					- timelineWidget.getBrowserHeight() - 16)
+					/ calcBase;
+		}
+
+		return bandHeight;
 	}
 
 	/**
@@ -102,11 +167,11 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	 */
 	public void removeBand(int id) {
 		int index = -1;
-		for (VEventTimelineBand band : bands) {
+		for (VEventTimelineBand band : allBands) {
 			if (band.getId() == id) {
-				index = bands.indexOf(band);
+				index = allBands.indexOf(band);
 				remove(band);
-				bands.remove(band);
+				allBands.remove(band);
 				break;
 			}
 		}
@@ -116,8 +181,8 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		}
 		int bandHeight = (getParent().getOffsetHeight()
 				- timelineWidget.getBrowserHeight() - 16)
-				/ bands.size();
-		for (VEventTimelineBand existingBand : bands) {
+				/ allBands.size();
+		for (VEventTimelineBand existingBand : allBands) {
 			existingBand.setHeight(bandHeight + "px");
 			existingBand.setWidth(100 + "px");
 		}
@@ -129,7 +194,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	 * @return
 	 */
 	public int getBandCount() {
-		return bands.size();
+		return allBands.size();
 	}
 
 	public int getBandHeight(int band) {
@@ -175,4 +240,29 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	public void redraw() {
 		timelineWidget.redrawDisplay();
 	}
+
+	/**
+	 * The maximum number of event bands shown in the band area.<br/>
+	 * If a value lower equal 0 is set, an unlimited number of bands can be
+	 * added.
+	 * 
+	 * @param pageSize
+	 */
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+
+		requestBandPage(pagePointer, pageSize);
+	}
+
+	/**
+	 * Returns the maximum number of event bands shown in the band area. If a
+	 * value lower equal 0 is returned, an unlimited number of bands can be
+	 * added.
+	 * 
+	 * @return the pageSize
+	 */
+	public int getPageSize() {
+		return pageSize;
+	}
+
 }

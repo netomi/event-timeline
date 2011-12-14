@@ -50,7 +50,9 @@ public class EventTimeline extends AbstractComponent implements
 	private final List<BandInfo> bandsToBeRemoved = new ArrayList<EventTimeline.BandInfo>();
 	private final List<BandInfo> bandsToBeAdded = new ArrayList<EventTimeline.BandInfo>();
 	private int lastBandId = -1;
-	private boolean bandPagingVisible;
+
+	// The number of event bands visible in the event page area
+	private int eventBandPageSize = -1;
 
 	// Initialization is done
 	private boolean initDone = false;
@@ -87,6 +89,9 @@ public class EventTimeline extends AbstractComponent implements
 
 	// Is the browser bar locked to the selection
 	protected boolean selectionBarLocked = true;
+
+	// Should a the page size be sent
+	private boolean sendEventBandPageSize = false;
 
 	// The events to send in the next refresh
 	private Date eventsStartTime = null;
@@ -135,6 +140,9 @@ public class EventTimeline extends AbstractComponent implements
 
 	// Is the legend visible
 	protected boolean legendVisible = false;
+
+	// Is the page navigation visible
+	protected boolean bandPagingVisible;
 
 	// The graph grid color (as CSS3 style rgba string)
 	protected String gridColor = "rgba(192,192,192,1)";
@@ -882,6 +890,13 @@ public class EventTimeline extends AbstractComponent implements
 			sendUICaptions = false;
 		}
 
+		// Send the number of event bands visible
+		if (sendEventBandPageSize) {
+			target.addAttribute(VEventTimelineWidget.ATTR_BAND_PAGE_SIZE,
+					eventBandPageSize);
+			sendEventBandPageSize = false;
+		}
+
 		if (sendBands) {
 			if (bandsToBeRemoved.size() > 0 || bandsToBeAdded.size() > 0) {
 				BandsPainter.start(target);
@@ -1317,6 +1332,35 @@ public class EventTimeline extends AbstractComponent implements
 	}
 
 	/**
+	 * Returns the numbers of event bands shown in the event bands area. A value
+	 * lower equal 0 means that an unlimited number of event bands can be shown
+	 * simultaneously at the band area.
+	 * 
+	 * @return the eventBandPageSize
+	 */
+	public int getEventBandPageSize() {
+		return eventBandPageSize;
+	}
+
+	/**
+	 * Specifies the numbers of event bands shown in the event bands area.<br/>
+	 * Setting a value lower equal 0 means that an unlimited number of event
+	 * bands can be shown simultaneously at the band area.
+	 * 
+	 * @param eventBandPageSize
+	 *            the eventBandPageSize to set
+	 */
+	public void setEventBandPageSize(int eventBandPageSize) {
+		this.eventBandPageSize = eventBandPageSize;
+
+		sendEventBandPageSize = true;
+
+		if (initDone) {
+			requestRepaint();
+		}
+	}
+
+	/**
 	 * Is the date select enabled.<br/>
 	 * The date select is the text fields in the top right corner of the
 	 * component which shows the currently selected date range.<br/>
@@ -1460,6 +1504,7 @@ public class EventTimeline extends AbstractComponent implements
 		sendZoomLevels = true;
 		sendUICaptions = true;
 		sendBands = true;
+		sendEventBandPageSize = true;
 	}
 
 	/**

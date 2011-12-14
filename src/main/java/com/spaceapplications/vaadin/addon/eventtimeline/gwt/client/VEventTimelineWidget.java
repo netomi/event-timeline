@@ -90,6 +90,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	public static final String ATTR_EVENT = "event";
 	public static final String ATTR_BANDID = "bandid";
 	public static final String ATTR_BAND = "band";
+	public static final String ATTR_BAND_PAGE_SIZE = "bandPageSize";
 	public static final String ATTR_END = "end";
 	public static final String ATTR_START = "start";
 	public static final String ATTR_EVENTS = "events";
@@ -758,6 +759,12 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	 * @param uidl
 	 */
 	private void setBands(UIDL uidl) {
+
+		if (uidl.hasAttribute(ATTR_BAND_PAGE_SIZE)) {
+			int pageSize = uidl.getIntAttribute(ATTR_BAND_PAGE_SIZE);
+			bandArea.setPageSize(pageSize);
+		}
+
 		UIDL bands = uidl.getChildByTagName(ATTR_BANDS);
 		if (bands != null) {
 			Iterator<Object> it = bands.getChildIterator();

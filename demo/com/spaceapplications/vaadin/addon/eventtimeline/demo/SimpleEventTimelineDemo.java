@@ -11,8 +11,11 @@ import com.spaceapplications.vaadin.addon.eventtimeline.event.BasicEventProvider
 import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEvent;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEventProvider;
 import com.vaadin.Application;
+import com.vaadin.data.Property;
+import com.vaadin.data.validator.IntegerValidator;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
 
 public class SimpleEventTimelineDemo extends Application {
@@ -25,11 +28,18 @@ public class SimpleEventTimelineDemo extends Application {
 
 		HorizontalLayout buttons = new HorizontalLayout();
 		buttons.setSpacing(true);
+		buttons.setMargin(true);
 		Button addBandButton = new Button("Add band");
 		buttons.addComponent(addBandButton);
 
 		Button removeLastBand = new Button("Remove last band");
 		buttons.addComponent(removeLastBand);
+
+		final TextField pageSize = new TextField("Pagesize");
+		pageSize.setImmediate(true);
+		pageSize.setInvalidAllowed(false);
+		pageSize.addValidator(new IntegerValidator("Only ints are allowed"));
+		buttons.addComponent(pageSize);
 
 		Button addEventToLastBand = new Button("Add new event...");
 		addEventToLastBand.setDescription("...to last band");
@@ -124,6 +134,14 @@ public class SimpleEventTimelineDemo extends Application {
 						provider.removeEvent(result);
 					}
 				}
+			}
+		});
+
+		pageSize.addListener(new Property.ValueChangeListener() {
+			@Override
+			public void valueChange(Property.ValueChangeEvent event) {
+				timeline.setEventBandPageSize(Integer.valueOf((String) pageSize
+						.getValue()));
 			}
 		});
 	}
