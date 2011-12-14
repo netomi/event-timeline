@@ -739,7 +739,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	}
 
 	private void setBandCaption(UIDL uidl) {
-		List<String> bandCaptions = new ArrayList<String>();
 		UIDL bands = uidl.getChildByTagName("bands");
 		if (bands != null) {
 			Iterator<Object> it = bands.getChildIterator();
@@ -750,19 +749,15 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 					String operation = child.getStringAttribute("operation");
 					if (operation.equals("add")) {
 						String caption = child.getStringAttribute("bcaption");
-						bandCaptions.add(caption);
+						bandArea.addBand(id, caption);
 					} else if (operation.equals("remove")) {
-
+						bandArea.removeBand(id);
 					}
 				}
 			}
 		}
 
-		numBands = bandCaptions.size();
-		if (bandCaptions.size() > 0) {
-			bandArea.setCaptions(bandCaptions.toArray(new String[bandCaptions
-					.size()]));
-		}
+		numBands = bandArea.getBandCount();
 
 		if (initDone) {
 			display.redraw();

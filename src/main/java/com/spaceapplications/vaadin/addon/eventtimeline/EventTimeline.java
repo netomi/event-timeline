@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -46,11 +47,11 @@ public class EventTimeline extends AbstractComponent implements
 	// ArrayList<TimelineEventProvider>();
 
 	// Event band captions
+	private final List<BandInfo> bandInfos = new ArrayList<BandInfo>();
+	private final List<BandInfo> bandsToBeRemoved = new ArrayList<EventTimeline.BandInfo>();
+	private final List<BandInfo> bandsToBeAdded = new ArrayList<EventTimeline.BandInfo>();
 	private int lastBandId = -1;
-	private List<BandInfo> bandInfos = new ArrayList<BandInfo>();
 	private boolean bandPagingVisible;
-	private List<BandInfo> bandsToBeRemoved = new ArrayList<EventTimeline.BandInfo>();
-	private List<BandInfo> bandsToBeAdded = new ArrayList<EventTimeline.BandInfo>();
 
 	// Initialization is done
 	private boolean initDone = false;
@@ -979,6 +980,13 @@ public class EventTimeline extends AbstractComponent implements
 
 		if (initDone) {
 			sendBands = true;
+			List<TimelineEvent> events = provider.getEvents(minDate, maxDate);
+			int idx = bandInfos.size() - 1;
+			eventsToSend.put(idx, events);
+			eventsStartTime = minDate;
+			eventsEndTime = maxDate;
+			requestRepaint();
+
 			requestRepaint();
 		}
 	}
@@ -1002,6 +1010,7 @@ public class EventTimeline extends AbstractComponent implements
 
 		if (result != null) {
 			result.getProvider().removeListener(this);
+			bandInfos.remove(result);
 			bandsToBeRemoved.add(result);
 		}
 
@@ -1235,6 +1244,15 @@ public class EventTimeline extends AbstractComponent implements
 	 */
 	public String getZoomLevelsCaption() {
 		return this.zoomLevelCaption;
+	}
+
+	/**
+	 * Returns a collection with informations about each added band.
+	 * 
+	 * @return the bandInfos
+	 */
+	public List<BandInfo> getBandInfos() {
+		return Collections.unmodifiableList(bandInfos);
 	}
 
 	/**
@@ -1481,7 +1499,7 @@ public class EventTimeline extends AbstractComponent implements
 	/**
 	 * Class describing the
 	 */
-	private static class BandInfo {
+	public static class BandInfo {
 		private final int bandId;
 		private final TimelineEventProvider provider;
 		private String caption;
@@ -1505,7 +1523,7 @@ public class EventTimeline extends AbstractComponent implements
 		 * @param caption
 		 *            the caption to set
 		 */
-		public void setCaption(String caption) {
+		protected void setCaption(String caption) {
 			this.caption = caption;
 		}
 
