@@ -11,9 +11,16 @@ import java.util.List;
  * @author Thomas Neidhart / Space Applications Services NV/SA
  */
 public interface VDataListener {
-  public void dataReceived(Integer band, List<VEvent> events);
+	public void dataReceived(Integer band, List<VEvent> events);
 
-  public void dataReceivedAll();
+	public void dataReceivedAll();
 
-  public boolean isVisible();
+	public boolean isVisible();
+
+	/**
+	 * Is called after a band was removed.
+	 * 
+	 * @param bands
+	 */
+	public void dataRemoved(Integer[] bands);
 }

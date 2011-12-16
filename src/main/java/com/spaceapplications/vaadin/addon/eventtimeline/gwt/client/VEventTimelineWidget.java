@@ -774,6 +774,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		}
 
 		boolean hasContent = bandArea.getBandCount() != 0;
+		List<Integer> removedBands = new ArrayList<Integer>();
 		UIDL bands = uidl.getChildByTagName(ATTR_BANDS);
 		if (bands != null) {
 			Iterator<Object> it = bands.getChildIterator();
@@ -791,9 +792,16 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 						}
 					} else if (operation.equals(OPERATION_REMOVE)) {
 						bandArea.removeBand(id);
+						removedBands.add(id);
 					}
 				}
 			}
+		}
+		
+		if(removedBands.size() > 0){
+			Integer[] bandIds = removedBands.toArray(new Integer[removedBands.size()]);
+			display.dataRemoved(bandIds);
+			browser.dataRemoved(bandIds);
 		}
 
 		if (!hasContent) {
@@ -1028,15 +1036,15 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 		if (useCache) {
 			boolean gotFromCache = true;
-			for (int band = 0; band < bandArea.getBandCount(); band++) {
-				List<VEvent> events = cache.getFromCache(band, startDate,
-						endDate);
+			for (VEventTimelineBand band : bandArea.getAllBands()) {
+				List<VEvent> events = cache.getFromCache(band.getId(),
+						startDate, endDate);
 				if (events == null) {
-					GWT.log("got empty cache for band " + band);
+					GWT.log("got empty cache for band " + band.getId());
 					gotFromCache = false;
 					break;
 				} else {
-					component.dataReceived(band, events);
+					component.dataReceived(band.getId(), events);
 				}
 			}
 

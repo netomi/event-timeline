@@ -5,6 +5,7 @@ package com.spaceapplications.vaadin.addon.eventtimeline.gwt.client;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -87,7 +88,7 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 	private final Map<Integer, List<VEvent>> currentEvents = new TreeMap<Integer, List<VEvent>>();
 	private final List<VEventLabel> events = new ArrayList<VEventLabel>();
 
-	private List<Integer> maxSlots = new ArrayList<Integer>();
+	private Map<Integer, Integer> maxSlots = new HashMap<Integer, Integer>();
 
 	// The selected date range
 	private Date currentStartDate = null;
@@ -488,31 +489,32 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 				int bandHeight = widget.getBandHeight(band);
 				int slots = maxSlots.get(band);
 
-				for (int idx = 0; idx < eventList.size(); idx++) {
-					VEvent event = eventList.get(idx);
-					Long eventStartTime = event.getStartTime();
-					Long eventEndTime = event.getEndTime();
+				if (bandHeight > 0) {
+					for (int idx = 0; idx < eventList.size(); idx++) {
+						VEvent event = eventList.get(idx);
+						Long eventStartTime = event.getStartTime();
+						Long eventEndTime = event.getEndTime();
 
-					Long timeFromStart = eventStartTime - startTime;
+						Long timeFromStart = eventStartTime - startTime;
 
-					float x = timeFromStart * xUnit;
+						float x = timeFromStart * xUnit;
 
-					Long duration = eventEndTime - eventStartTime;
-					float w = duration * xUnit;
+						Long duration = eventEndTime - eventStartTime;
+						float w = duration * xUnit;
 
-					int cw = canvas.getWidth();
-					if ((x >= 0 && x + w < cw)
-							|| (x < 0 && x + w > 0 && x + w < cw)
-							|| (x >= 0 && x < cw && x + w > cw)
-							|| (x <= 0 && x + w > cw)) {
-						if (force) {
-							int height = Math.max(0, bandHeight - 6);
-							plotEvent(event, x, y, w, slots, height);
+						int cw = canvas.getWidth();
+						if ((x >= 0 && x + w < cw)
+								|| (x < 0 && x + w > 0 && x + w < cw)
+								|| (x >= 0 && x < cw && x + w > cw)
+								|| (x <= 0 && x + w > cw)) {
+							if (force) {
+								int height = Math.max(0, bandHeight - 6);
+								plotEvent(event, x, y, w, slots, height);
+							}
 						}
 					}
+					y += bandHeight;
 				}
-
-				y += bandHeight;
 			}
 		}
 
@@ -612,9 +614,9 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 		int slotPosition = (int) (slotHeight * (float) event.getSlotIndex());
 		int elementHeight = (int) (slotHeight * (float) event.getHeight())
 				- space;
-		 
-		final VEventLabel eventElement = new VEventLabel(event, w,
-				Math.max(0, elementHeight));
+
+		final VEventLabel eventElement = new VEventLabel(event, w, Math.max(0,
+				elementHeight));
 		displayComponentPanel
 				.add(eventElement, (int) x, (int) y + slotPosition);
 
@@ -632,11 +634,7 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 			Long startTime = currentStartDate.getTime();
 			Long endTime = currentEndDate.getTime();
 			int slots = checkOverlaps(events, startTime, endTime);
-			if (maxSlots.size() > band) {
-				maxSlots.set(band, slots);
-			} else {
-				maxSlots.add(band, slots);
-			}
+			maxSlots.put(band, slots);
 		}
 	}
 
@@ -652,6 +650,31 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 
 		// hide curtain
 		setLoadingIndicatorVisible(false);
+	}
+
+	@Override
+	public void dataRemoved(Integer[] bands) {
+		for (int i = 0; i < bands.length; i++) {
+			Integer band = bands[i];
+			// Check if we have events
+			if (events != null) {
+				currentEvents.remove(band);
+				maxSlots.remove(band.intValue());
+
+				// // we have received data for all bands, redraw now the
+				// display
+				// plotData(forcePlot);
+				//
+				// // forced plotting is always turned off after a forced plot.
+				// // To force it again you have to set it on again be
+				// // before the next plot.
+				// forcePlot = false;
+				//
+				// // hide curtain
+				// setLoadingIndicatorVisible(false);
+			}
+		}
+
 	}
 
 	/**

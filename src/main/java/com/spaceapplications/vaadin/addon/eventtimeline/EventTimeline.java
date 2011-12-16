@@ -997,8 +997,7 @@ public class EventTimeline extends AbstractComponent implements
 		if (initDone) {
 			sendBands = true;
 			List<TimelineEvent> events = provider.getEvents(minDate, maxDate);
-			int idx = bandInfos.size() - 1;
-			eventsToSend.put(idx, events);
+			eventsToSend.put(result.getBandId(), events);
 			eventsStartTime = minDate;
 			eventsEndTime = maxDate;
 			requestRepaint();
@@ -1040,17 +1039,20 @@ public class EventTimeline extends AbstractComponent implements
 	public void eventSetChange(EventSetChange changeEvent) {
 		TimelineEventProvider provider = changeEvent.getProvider();
 		List<TimelineEvent> events = provider.getEvents(minDate, maxDate);
-		int idx = 0;
+
+		int bandId = -1;
 		for (BandInfo info : bandInfos) {
 			if (info.getProvider().equals(provider)) {
+				bandId = info.getBandId();
 				break;
 			}
-			idx++;
 		}
 
-		eventsToSend.put(idx, events);
-		eventsStartTime = minDate;
-		eventsEndTime = maxDate;
+		if (bandId >= 0) {
+			eventsToSend.put(bandId, events);
+			eventsStartTime = minDate;
+			eventsEndTime = maxDate;
+		}
 		requestRepaint();
 	}
 
@@ -1486,10 +1488,9 @@ public class EventTimeline extends AbstractComponent implements
 			Date end) {
 		Map<Integer, List<TimelineEvent>> events = new HashMap<Integer, List<TimelineEvent>>();
 
-		int idx = 0;
 		for (BandInfo info : bandInfos) {
 			TimelineEventProvider provider = info.getProvider();
-			events.put(idx++, provider.getEvents(start, end));
+			events.put(info.getBandId(), provider.getEvents(start, end));
 		}
 
 		return events;

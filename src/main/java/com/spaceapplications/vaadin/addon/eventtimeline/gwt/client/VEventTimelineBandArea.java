@@ -6,6 +6,7 @@ package com.spaceapplications.vaadin.addon.eventtimeline.gwt.client;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -200,17 +201,28 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		}
 
 		// remove the band
-		allBands.remove(band);
 		if (visibleBands.contains(band)) {
 			int page = getContainingPage(band);
+			allBands.remove(band);
 			remove(band);
 			visibleBands.remove(band);
 
+			// test if current page would be empty since removed was first
+			// element of last page
+			if (page > 0) {
+				int firstBandInPage = calcFirstBandInPage(page);
+				if (firstBandInPage >= allBands.size()) {
+					page--;
+				}
+			}
+
+			// if the page is valide, navigate to it
 			if (page >= 0) {
 				setVisiblePage(page);
 			}
+		} else {
+			allBands.remove(band);
 		}
-
 	}
 
 	/**
@@ -220,6 +232,24 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	 */
 	public int getBandCount() {
 		return allBands.size();
+	}
+
+	/**
+	 * Returns all available bands.
+	 * 
+	 * @return the allBands
+	 */
+	public List<VEventTimelineBand> getAllBands() {
+		return Collections.unmodifiableList(allBands);
+	}
+
+	/**
+	 * Returns all visible bands.
+	 * 
+	 * @return the visibleBands
+	 */
+	public List<VEventTimelineBand> getVisibleBands() {
+		return Collections.unmodifiableList(visibleBands);
 	}
 
 	/**
@@ -373,11 +403,22 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 			return;
 		}
 
+		int firstBandInPage = calcFirstBandInPage(pageNumber);
+		requestBuildPage(firstBandInPage, pageSize);
+	}
+
+	/**
+	 * Calculates the index of the first band in the page.
+	 * 
+	 * @param pageNumber
+	 * @return
+	 */
+	protected int calcFirstBandInPage(int pageNumber) {
 		int firstBandInPage = 0;
 		if (pageSize > 0) {
 			firstBandInPage = pageNumber * pageSize;
 		}
-		requestBuildPage(firstBandInPage, pageSize);
+		return firstBandInPage;
 	}
 
 	/**
