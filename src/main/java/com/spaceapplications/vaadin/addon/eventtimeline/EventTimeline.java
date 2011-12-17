@@ -670,8 +670,7 @@ public class EventTimeline extends AbstractComponent implements
 	 */
 	private static final Method DATERANGE_CHANGED_METHOD;
 	private static final Method EVENT_CLICK_METHOD;
-
-	private static final Method BAND_NAVIGATION_METHOD;
+	private static final Method PAGE_NAVIGATION_METHOD;
 
 	static {
 		try {
@@ -682,7 +681,7 @@ public class EventTimeline extends AbstractComponent implements
 			EVENT_CLICK_METHOD = EventClickListener.class.getDeclaredMethod(
 					"eventClick", new Class[] { EventButtonClickEvent.class });
 
-			BAND_NAVIGATION_METHOD = PageNavigationListener.class
+			PAGE_NAVIGATION_METHOD = PageNavigationListener.class
 					.getDeclaredMethod("requestNavigation",
 							new Class[] { PageNavigationEvent.class });
 
@@ -1135,7 +1134,7 @@ public class EventTimeline extends AbstractComponent implements
 	 *            The listener to be added
 	 */
 	public void addListener(PageNavigationListener listener) {
-		addListener(PageNavigationEvent.class, listener, BAND_NAVIGATION_METHOD);
+		addListener(PageNavigationEvent.class, listener, PAGE_NAVIGATION_METHOD);
 	}
 
 	/**
