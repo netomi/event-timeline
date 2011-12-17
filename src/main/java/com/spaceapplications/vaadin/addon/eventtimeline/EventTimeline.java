@@ -132,6 +132,10 @@ public class EventTimeline extends AbstractComponent implements
 	// The caption of the zoom levels
 	protected String zoomLevelCaption = "Zoom";
 
+	// The captions of the band paging navigation
+	private PageNavigationCaptions pagingCaption = new PageNavigationCaptions(
+			"Pages", "next", "previous");
+
 	// Is the date select visible
 	protected boolean dateSelectVisible = true;
 
@@ -142,7 +146,7 @@ public class EventTimeline extends AbstractComponent implements
 	protected boolean legendVisible = false;
 
 	// Is the page navigation visible
-	protected boolean bandPagingVisible;
+	protected boolean pageNavigationVisible;
 
 	// The graph grid color (as CSS3 style rgba string)
 	protected String gridColor = "rgba(192,192,192,1)";
@@ -260,10 +264,10 @@ public class EventTimeline extends AbstractComponent implements
 	}
 
 	/**
-	 * Band paging event. This event is sent when a user selected the next /
-	 * previous band button.
+	 * Page navigation event. This event is sent when a user selected the next /
+	 * previous page button.
 	 */
-	public class BandPagingEvent extends Component.Event {
+	public class PageNavigationEvent extends Component.Event {
 
 		private final int page;
 
@@ -274,7 +278,7 @@ public class EventTimeline extends AbstractComponent implements
 		 * @param page
 		 *            If true, then the next band is requested. False otherwise.
 		 */
-		public BandPagingEvent(Component source, int page) {
+		public PageNavigationEvent(Component source, int page) {
 			super(source);
 
 			this.page = page;
@@ -657,8 +661,8 @@ public class EventTimeline extends AbstractComponent implements
 	/**
 	 * The band paging listener interface
 	 */
-	public interface BandPagingListener {
-		public void requestNavigation(BandPagingEvent event);
+	public interface PageNavigationListener {
+		public void requestNavigation(PageNavigationEvent event);
 	}
 
 	/*
@@ -678,9 +682,9 @@ public class EventTimeline extends AbstractComponent implements
 			EVENT_CLICK_METHOD = EventClickListener.class.getDeclaredMethod(
 					"eventClick", new Class[] { EventButtonClickEvent.class });
 
-			BAND_NAVIGATION_METHOD = BandPagingListener.class
+			BAND_NAVIGATION_METHOD = PageNavigationListener.class
 					.getDeclaredMethod("requestNavigation",
-							new Class[] { BandPagingEvent.class });
+							new Class[] { PageNavigationEvent.class });
 
 		} catch (final java.lang.NoSuchMethodException e) {
 			// This should never happen
@@ -862,6 +866,7 @@ public class EventTimeline extends AbstractComponent implements
 			target.addAttribute("dateSelectVisibility", dateSelectVisible);
 			target.addAttribute("dateSelectEnabled", dateSelectEnabled);
 			target.addAttribute("legendVisibility", legendVisible);
+			target.addAttribute("bandPagingVisible", pageNavigationVisible);
 			sendComponentVisibilities = false;
 		}
 
@@ -887,6 +892,12 @@ public class EventTimeline extends AbstractComponent implements
 		// Send the UI captions if they have changed
 		if (sendUICaptions) {
 			target.addAttribute("zlvlcaption", zoomLevelCaption);
+			target.addAttribute("bpgingCaption", pagingCaption.getCaption());
+			target.addAttribute("bpgingCptPrevious",
+					pagingCaption.getCaption_previous());
+			target.addAttribute("bpgingCptNext",
+					pagingCaption.getCaption_next());
+
 			sendUICaptions = false;
 		}
 
@@ -1123,8 +1134,8 @@ public class EventTimeline extends AbstractComponent implements
 	 * @param listener
 	 *            The listener to be added
 	 */
-	public void addListener(BandPagingListener listener) {
-		addListener(BandPagingEvent.class, listener, BAND_NAVIGATION_METHOD);
+	public void addListener(PageNavigationListener listener) {
+		addListener(PageNavigationEvent.class, listener, BAND_NAVIGATION_METHOD);
 	}
 
 	/**
@@ -1182,7 +1193,7 @@ public class EventTimeline extends AbstractComponent implements
 	 *            The visible page of the band area.
 	 */
 	protected void fireBandPagingEvent(int page) {
-		fireEvent(new EventTimeline.BandPagingEvent(this, page));
+		fireEvent(new EventTimeline.PageNavigationEvent(this, page));
 	}
 
 	/**
@@ -1263,6 +1274,33 @@ public class EventTimeline extends AbstractComponent implements
 	}
 
 	/**
+	 * Returns the captions of the band paging element.
+	 * 
+	 * @return the pagingCaption
+	 */
+	public PageNavigationCaptions getPageNavigationCaptions() {
+		return pagingCaption;
+	}
+
+	/**
+	 * Sets the pagingCaptions of the band paging element.
+	 * 
+	 * @param pagingCaption
+	 *            the pagingCaption to set
+	 */
+	public void setPageNavigationCaptions(PageNavigationCaptions pagingCaption) {
+		if (pagingCaption == null) {
+			pagingCaption = new PageNavigationCaptions("", "", "");
+		}
+
+		this.pagingCaption = pagingCaption;
+		sendUICaptions = true;
+		if (initDone) {
+			requestRepaint();
+		}
+	}
+
+	/**
 	 * Returns a collection with informations about each added band.
 	 * 
 	 * @return the bandInfos
@@ -1283,22 +1321,6 @@ public class EventTimeline extends AbstractComponent implements
 		dateSelectVisible = visible;
 		sendComponentVisibilities = true;
 
-		if (initDone) {
-			requestRepaint();
-		}
-	}
-
-	/**
-	 * Shows the band page navigation.<br/>
-	 * Using the band page navigation allows to observe the requested band page.
-	 * If the band page changes, new events can be sent to the client side
-	 * widget representing the requested page.
-	 * 
-	 * @param visible
-	 */
-	public void setBandPagingVisible(boolean visible) {
-		bandPagingVisible = visible;
-		sendComponentVisibilities = true;
 		if (initDone) {
 			requestRepaint();
 		}
@@ -1331,6 +1353,29 @@ public class EventTimeline extends AbstractComponent implements
 		if (initDone) {
 			requestRepaint();
 		}
+	}
+
+	/**
+	 * Shows the page navigation.<br/>
+	 * Using the page navigation allows to observe the requested band page.
+	 * 
+	 * @param visible
+	 */
+	public void setPageNavigationVisible(boolean visible) {
+		pageNavigationVisible = visible;
+		sendComponentVisibilities = true;
+		if (initDone) {
+			requestRepaint();
+		}
+	}
+
+	/**
+	 * Returns true, if the page navigation is visible.
+	 * 
+	 * @return the pageNavigationVisible
+	 */
+	public boolean isPageNavigationVisible() {
+		return pageNavigationVisible;
 	}
 
 	/**
@@ -1577,6 +1622,61 @@ public class EventTimeline extends AbstractComponent implements
 			target.addAttribute(VEventTimelineWidget.ATTR_OPERATION,
 					VEventTimelineWidget.OPERATION_REMOVE);
 			target.endTag(VEventTimelineWidget.ATTR_BAND);
+		}
+
+	}
+
+	/**
+	 * Can be used to specify the captions of the band paging navigation
+	 * element.
+	 */
+	public static class PageNavigationCaptions {
+		private final String caption;
+		private final String caption_next;
+		private final String caption_previous;
+
+		/**
+		 * 
+		 * @param caption
+		 *            main caption
+		 * @param caption_next
+		 *            caption of the next button
+		 * @param caption_previous
+		 *            caption of the previous button
+		 */
+		public PageNavigationCaptions(String caption, String caption_next,
+				String caption_previous) {
+			super();
+			this.caption = caption;
+			this.caption_next = caption_next;
+			this.caption_previous = caption_previous;
+		}
+
+		/**
+		 * Main caption.
+		 * 
+		 * @return the caption
+		 */
+		public String getCaption() {
+			return caption;
+		}
+
+		/**
+		 * Caption of the next button.
+		 * 
+		 * @return the caption_next
+		 */
+		public String getCaption_next() {
+			return caption_next;
+		}
+
+		/**
+		 * Caption of the previous button.
+		 * 
+		 * @return the caption_previous
+		 */
+		public String getCaption_previous() {
+			return caption_previous;
 		}
 
 	}

@@ -66,7 +66,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private static final String CLASSNAME_MODELEGEND_ROW = CLASSNAME
 			+ "-modelegend";
 	private static final String CLASSNAME_BANDPAGE = CLASSNAME
-			+ "-bandpagenavigation";
+			+ "-pagenavigation";
 	private static final String CLASSNAME_BANDPAGE_LABEL = CLASSNAME_BANDPAGE
 			+ "-label";
 	private static final String CLASSNAME_BANDPAGE_NEXT = CLASSNAME_BANDPAGE
@@ -105,9 +105,9 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		}
 	};
 
-	private final ClickHandler bandNavigationClickHandler = new ClickHandler() {
+	private final ClickHandler pageNavigationClickHandler = new ClickHandler() {
 		public void onClick(ClickEvent event) {
-			bandNavigationClicked(event);
+			pageNavigationClicked(event);
 		}
 	};
 
@@ -166,6 +166,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private boolean dateSelectVisible = true;
 	private boolean dateSelectEnabled = true;
 	private boolean legendVisible = false;
+	private boolean bandPagingVisible = false;
 
 	// Date formats
 	private DateTimeFormat displayFormat = DateTimeFormat.getFormat("MMM d, y");
@@ -178,10 +179,10 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private VClientCache cache = new VClientCache(this);
 
 	// Band Navigation
-	private HorizontalPanel bandNavigationBar;
-	private Anchor previousBandsPage;
-	private Label bandPageText;
-	private Anchor nextBandsPage;
+	private HorizontalPanel pageNavigationBar;
+	private Anchor previousPage;
+	private Label pageNumberText;
+	private Anchor nextPage;
 
 	public VEventTimelineWidget() {
 
@@ -200,7 +201,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 		topBar = new HorizontalPanel();
 		topBar.setStyleName(CLASSNAME_TOPBAR);
-		topBar.setVisible(zoomIsVisible || dateSelectVisible);
+		topBar.setVisible(zoomIsVisible || dateSelectVisible
+				|| bandPagingVisible);
 		root.add(topBar);
 
 		zoomBar = new HorizontalPanel();
@@ -312,34 +314,33 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		//
 		// band navigation area
 		//
-		bandNavigationBar = new HorizontalPanel();
-		bandNavigationBar.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
-		bandNavigationBar.setStyleName(CLASSNAME_BANDPAGE);
-		// bandNavigationBar.setWidth("52px");
-		bandNavigationBar.setHeight("31px");
-		bandNavigationBar.setVisible(true);
-		topBar.add(bandNavigationBar);
-		topBar.setCellHorizontalAlignment(bandNavigationBar,
+		pageNavigationBar = new HorizontalPanel();
+		pageNavigationBar.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
+		pageNavigationBar.setStyleName(CLASSNAME_BANDPAGE);
+		pageNavigationBar.setVisible(bandPagingVisible);
+		pageNavigationBar.setHeight("31px");
+		topBar.add(pageNavigationBar);
+		topBar.setCellHorizontalAlignment(pageNavigationBar,
 				HorizontalPanel.ALIGN_RIGHT);
 
 		Label navigationLbl = new Label("Navigation:");
 		navigationLbl.addStyleName(CLASSNAME_BANDPAGE_LABEL);
-		bandNavigationBar.add(navigationLbl);
+		pageNavigationBar.add(navigationLbl);
 
-		previousBandsPage = new Anchor("Previous page");
-		bandNavigationBar.add(previousBandsPage);
-		previousBandsPage.addStyleName(CLASSNAME_BANDPAGE_PREVIOUS);
-		previousBandsPage.addClickHandler(bandNavigationClickHandler);
+		previousPage = new Anchor("Previous page");
+		pageNavigationBar.add(previousPage);
+		previousPage.addStyleName(CLASSNAME_BANDPAGE_PREVIOUS);
+		previousPage.addClickHandler(pageNavigationClickHandler);
 
-		bandPageText = new Label();
-		bandNavigationBar.add(bandPageText);
-		bandPageText.addStyleName(CLASSNAME_BANDPAGE_PAGENUMBER);
-		bandPageText.setText("1");
+		pageNumberText = new Label();
+		pageNavigationBar.add(pageNumberText);
+		pageNumberText.addStyleName(CLASSNAME_BANDPAGE_PAGENUMBER);
+		pageNumberText.setText("1");
 
-		nextBandsPage = new Anchor("Next page");
-		bandNavigationBar.add(nextBandsPage);
-		nextBandsPage.addStyleName(CLASSNAME_BANDPAGE_NEXT);
-		nextBandsPage.addClickHandler(bandNavigationClickHandler);
+		nextPage = new Anchor("Next page");
+		pageNavigationBar.add(nextPage);
+		nextPage.addStyleName(CLASSNAME_BANDPAGE_NEXT);
+		nextPage.addClickHandler(pageNavigationClickHandler);
 
 		legend = new HorizontalPanel();
 		legend.setVisible(legendVisible);
@@ -456,16 +457,16 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	}
 
 	/**
-	 * A band navigation was clicked
+	 * A page navigation button was clicked
 	 * 
 	 * @param evt
 	 *            The click event
 	 */
-	private void bandNavigationClicked(ClickEvent evt) {
+	private void pageNavigationClicked(ClickEvent evt) {
 
 		boolean redraw = false;
 		int bandPage = bandArea.getVisiblePage();
-		if (evt.getSource() == nextBandsPage) {
+		if (evt.getSource() == nextPage) {
 			if (bandPage < bandArea.getPageCount() - 1) {
 				bandPage++;
 				bandArea.setVisiblePage(bandPage);
@@ -496,6 +497,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setEndDate(uidl);
 		setCaption(uidl);
 		setZoomCaption(uidl);
+		setPageNavigationCaptions(uidl);
 		setSelectionLock(uidl);
 		setDateFormatInfo(uidl);
 		setLocale(uidl);
@@ -510,8 +512,10 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setGridColor(uidl);
 		setZoomLevels(uidl);
 		setZoomCaption(uidl);
+		setPageNavigationCaptions(uidl);
 
 		setZoomVisibility(uidl);
+		setPageNavigationVisibility(uidl);
 		setDateSelectEnabled(uidl);
 		setDateSelectVisibility(uidl);
 		setBrowserVisibility(uidl);
@@ -610,7 +614,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 			if (zoomBar != null) {
 				zoomBar.setVisible(zoomIsVisible);
-				setTopBarVisibility(zoomIsVisible || dateSelectVisible);
+				setTopBarVisibility(zoomIsVisible || dateSelectVisible
+						|| bandPagingVisible);
 			}
 		}
 	}
@@ -620,6 +625,36 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			String caption = uidl.getStringAttribute("zlvlcaption");
 			Label lbl = (Label) zoomBar.getWidget(0);
 			lbl.setText(caption);
+		}
+	}
+
+	private void setPageNavigationVisibility(UIDL uidl) {
+		if (uidl.hasAttribute("bandPagingVisible")) {
+			bandPagingVisible = uidl.getBooleanAttribute("bandPagingVisible");
+
+			if (pageNavigationBar != null) {
+				pageNavigationBar.setVisible(bandPagingVisible);
+				setTopBarVisibility(zoomIsVisible || dateSelectVisible
+						|| bandPagingVisible);
+			}
+		}
+	}
+
+	private void setPageNavigationCaptions(UIDL uidl) {
+		if (uidl.hasAttribute("bpgingCaption")) {
+			String caption = uidl.getStringAttribute("bpgingCaption");
+			Label lbl = (Label) pageNavigationBar.getWidget(0);
+			lbl.setText(caption);
+		}
+
+		if (uidl.hasAttribute("bpgingCptPrevious")) {
+			String caption = uidl.getStringAttribute("bpgingCptPrevious");
+			previousPage.setText(caption);
+		}
+
+		if (uidl.hasAttribute("bpgingCptNext")) {
+			String caption = uidl.getStringAttribute("bpgingCptNext");
+			nextPage.setText(caption);
 		}
 	}
 
@@ -715,7 +750,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 			if (dateRangeBar != null) {
 				dateRangeBar.setVisible(dateSelectVisible);
-				setTopBarVisibility(zoomIsVisible || dateSelectVisible);
+				setTopBarVisibility(zoomIsVisible || dateSelectVisible
+						|| bandPagingVisible);
 			}
 		}
 	}
@@ -797,9 +833,10 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 				}
 			}
 		}
-		
-		if(removedBands.size() > 0){
-			Integer[] bandIds = removedBands.toArray(new Integer[removedBands.size()]);
+
+		if (removedBands.size() > 0) {
+			Integer[] bandIds = removedBands.toArray(new Integer[removedBands
+					.size()]);
 			display.dataRemoved(bandIds);
 			browser.dataRemoved(bandIds);
 		}
@@ -820,7 +857,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	 * Refreshes the page number.
 	 */
 	private void refreshPageNumber() {
-		bandPageText.setText(Integer.toString(bandArea.getVisiblePage() + 1));
+		pageNumberText.setText(Integer.toString(bandArea.getVisiblePage() + 1));
 	}
 
 	protected int getBandHeight(int band) {
@@ -893,6 +930,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setZoomLevels(uidl);
 		setGridColor(uidl);
 		setZoomCaption(uidl);
+		setPageNavigationCaptions(uidl);
 		setDateFormatInfo(uidl);
 
 		// Data received
