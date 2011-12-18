@@ -821,8 +821,6 @@ public class EventTimeline extends AbstractComponent implements
 				target.startTag(VEventTimelineWidget.ATTR_BAND);
 				target.addAttribute(VEventTimelineWidget.ATTR_BANDID,
 						entry.getKey());
-				// target.addAttribute("events",
-				// getEventsAsStringArray(entry.getValue()));
 				for (TimelineEvent event : entry.getValue()) {
 					target.startTag(VEventTimelineWidget.ATTR_EVENT);
 					paintEvent(event, target);

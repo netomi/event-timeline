@@ -8,6 +8,7 @@ import com.spaceapplications.vaadin.addon.eventtimeline.EventTimeline;
 import com.spaceapplications.vaadin.addon.eventtimeline.EventTimeline.BandInfo;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.BasicEvent;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.BasicEventProvider;
+import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEvent;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEventProvider;
 import com.vaadin.Application;
 import com.vaadin.data.Property;
@@ -40,14 +41,14 @@ public class SimpleEventTimelineDemo extends Application {
 		pageSize.addValidator(new IntegerValidator("Only ints are allowed"));
 		buttons.addComponent(pageSize);
 
-		// Button addEventToLastBand = new Button("Add new event...");
-		// addEventToLastBand.setDescription("...to last band");
-		// buttons.addComponent(addEventToLastBand);
-		//
-		// Button removeFirstEventFromLastBand = new Button(
-		// "Remove first event...");
-		// removeFirstEventFromLastBand.setDescription("...from last band");
-		// buttons.addComponent(removeFirstEventFromLastBand);
+		Button addEventToLastBand = new Button("Add new event...");
+		addEventToLastBand.setDescription("...to last band");
+		buttons.addComponent(addEventToLastBand);
+		
+		Button removeFirstEventFromLastBand = new Button(
+				"Remove first event...");
+		removeFirstEventFromLastBand.setDescription("...from last band");
+		buttons.addComponent(removeFirstEventFromLastBand);
 
 		mainWindow.addComponent(buttons);
 
@@ -55,6 +56,7 @@ public class SimpleEventTimelineDemo extends Application {
 		final EventTimeline timeline = new EventTimeline("Our event timeline");
 		timeline.setHeight("500px");
 		timeline.setWidth("100%");
+		timeline.setPageNavigationVisible(true);
 
 		// set the visible time range
 		final Calendar cal = Calendar.getInstance();
@@ -95,48 +97,51 @@ public class SimpleEventTimelineDemo extends Application {
 			}
 		});
 
-		// addEventToLastBand.addListener(new Button.ClickListener() {
-		// @Override
-		// public void buttonClick(Button.ClickEvent event) {
-		// List<BandInfo> infos = timeline.getBandInfos();
-		// if (infos.size() > 0) {
-		// BasicEventProvider provider = (BasicEventProvider) infos
-		// .get(infos.size() - 1).getProvider();
-		// List<TimelineEvent> events = provider.getEvents(start, end);
-		// // create a simple event
-		// BasicEvent result = new BasicEvent();
-		// result.setEventId(String.valueOf(events.size() + 1));
-		//
-		// // set the timestamp property
-		// result.setStart(cal.getTime());
-		// cal.add(Calendar.MINUTE, 10);
-		// result.setEnd(cal.getTime());
-		// // set the caption
-		// result.setCaption("Event");
-		// // style the event
-		// result.setStyleName("color4");
-		//
-		// provider.addEvent(result);
-		// cal.add(Calendar.MINUTE, 4);
-		// }
-		// }
-		// });
-		//
-		// removeFirstEventFromLastBand.addListener(new Button.ClickListener() {
-		// @Override
-		// public void buttonClick(Button.ClickEvent event) {
-		// List<BandInfo> infos = timeline.getBandInfos();
-		// if (infos.size() > 0) {
-		// BasicEventProvider provider = (BasicEventProvider) infos
-		// .get(infos.size() - 1).getProvider();
-		// List<TimelineEvent> events = provider.getEvents(start, end);
-		// if (events.size() > 0) {
-		// BasicEvent result = (BasicEvent) events.get(0);
-		// provider.removeEvent(result);
-		// }
-		// }
-		// }
-		// });
+		addEventToLastBand.addListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(Button.ClickEvent event) {
+				List<BandInfo> infos = timeline.getBandInfos();
+				if (infos.size() > 0) {
+					BasicEventProvider provider = (BasicEventProvider) infos
+							.get(infos.size() - 1).getProvider();
+					List<TimelineEvent> events = provider.getEvents(start, end);
+					// create a simple event
+					BasicEvent result = new BasicEvent();
+					result.setEventId(String.valueOf(events.size() + 1));
+
+					// set the visible time range
+					final Calendar cal = Calendar.getInstance();
+					cal.add(Calendar.HOUR, 1);
+					// set the timestamp property
+					result.setStart(cal.getTime());
+					cal.add(Calendar.MINUTE, 10);
+					result.setEnd(cal.getTime());
+					// set the caption
+					result.setCaption("Event");
+					// style the event
+					result.setStyleName("color4");
+
+					provider.addEvent(result);
+					cal.add(Calendar.MINUTE, 4);
+				}
+			}
+		});
+
+		removeFirstEventFromLastBand.addListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(Button.ClickEvent event) {
+				List<BandInfo> infos = timeline.getBandInfos();
+				if (infos.size() > 0) {
+					BasicEventProvider provider = (BasicEventProvider) infos
+							.get(infos.size() - 1).getProvider();
+					List<TimelineEvent> events = provider.getEvents(start, end);
+					if (events.size() > 0) {
+						BasicEvent result = (BasicEvent) events.get(0);
+						provider.removeEvent(result);
+					}
+				}
+			}
+		});
 
 		pageSize.addListener(new Property.ValueChangeListener() {
 			@Override

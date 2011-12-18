@@ -945,9 +945,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 				UIDL child = (UIDL) it.next();
 				if (child != null && "band".equals(child.getTag())) {
 					Integer id = child.getIntAttribute("bandid");
-					// String[] eventsArray =
-					// child.getStringArrayAttribute("events");
-					// events = getEventsFromStringArray(eventsArray);
 					events = getEvents(child);
 					cache.addToCache(id, new Date(startTime),
 							new Date(endTime), events);
