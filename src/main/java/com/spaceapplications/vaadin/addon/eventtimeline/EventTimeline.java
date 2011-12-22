@@ -1043,6 +1043,15 @@ public class EventTimeline extends AbstractComponent implements
 		}
 	}
 
+	/**
+	 * Removes all event bands from the timeline.
+	 */
+	public void removeAllEventBands() {
+		for (BandInfo info : getBandInfos()) {
+			removeEventBand(info.getProvider());
+		}
+	}
+
 	@Override
 	public void eventSetChange(EventSetChange changeEvent) {
 		TimelineEventProvider provider = changeEvent.getProvider();
@@ -1303,7 +1312,7 @@ public class EventTimeline extends AbstractComponent implements
 	 * @return the bandInfos
 	 */
 	public List<BandInfo> getBandInfos() {
-		return Collections.unmodifiableList(bandInfos);
+		return Collections.unmodifiableList(new ArrayList<BandInfo>(bandInfos));
 	}
 
 	/**
