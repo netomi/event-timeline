@@ -28,6 +28,8 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler,
 
 	private static final String CLASSNAME_BAND = VEventTimelineWidget.CLASSNAME
 			+ "-band";
+	private static final String CLASSNAME_BAND_SELECTED = CLASSNAME_BAND
+			+ "-selected";
 	private static final String CLASSNAME_BAND_LABEL = CLASSNAME_BAND
 			+ "-label";
 	private static final String CLASSNAME_BAND_ADJUSTER = "v-band-adjuster";
@@ -49,6 +51,7 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler,
 
 	private int bandId;
 	private VEventTimelineBandArea bandArea;
+	private boolean selected;
 
 	public VEventTimelineBand(int bandId, final String caption,
 			final VEventTimelineBandArea bandArea) {
@@ -119,6 +122,38 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler,
 	}
 
 	/**
+	 * Returns true, if the band is selected.
+	 * 
+	 * @return
+	 */
+	public boolean isSelected() {
+		return selected;
+	}
+
+	/**
+	 * Pass true, to mark the band as selected and false to deselect a band.
+	 * 
+	 * @param value
+	 */
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+		applySelectionStyle();
+	}
+
+	/**
+	 * Applies a style attribute based on the selection state.
+	 */
+	private void applySelectionStyle() {
+		if (selected) {
+			removeStyleName(CLASSNAME_BAND);
+			addStyleName(CLASSNAME_BAND_SELECTED);
+		} else {
+			removeStyleName(CLASSNAME_BAND_SELECTED);
+			addStyleName(CLASSNAME_BAND);
+		}
+	}
+
+	/**
 	 * Returns the id of that band.
 	 * 
 	 * @return the bandId
@@ -178,6 +213,9 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler,
 
 		DOM.releaseCapture(bandRoot);
 		sizeAdjust = false;
+
+		// notify that the band was selected
+		bandArea.bandSelected(bandId);
 
 		// redraw
 		bandArea.redraw();

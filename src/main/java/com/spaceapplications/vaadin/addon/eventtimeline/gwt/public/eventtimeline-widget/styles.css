@@ -462,6 +462,15 @@
   background: url("default-gradient.png") top left repeat-x #413e3a;
 }
 
+.v-eventtimeline-widget-band-selected {
+  left:0px;
+  top: 0px;
+  background: url("default-gradient.png") top left repeat-x #413e3a;
+  border-top: 1px solid blue;
+  border-right: 2px solid blue;
+  border-bottom: 1px solid blue;
+}
+
 .v-eventtimeline-widget-band-label {
   padding: 4px 9px;
   font-size: 12px;

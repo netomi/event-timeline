@@ -44,11 +44,14 @@ public class SimpleEventTimelineDemo extends Application {
 		Button addEventToLastBand = new Button("Add new event...");
 		addEventToLastBand.setDescription("...to last band");
 		buttons.addComponent(addEventToLastBand);
-		
+
 		Button removeFirstEventFromLastBand = new Button(
 				"Remove first event...");
 		removeFirstEventFromLastBand.setDescription("...from last band");
 		buttons.addComponent(removeFirstEventFromLastBand);
+
+		final Button enableBandSelection = new Button("Enable band selection");
+		buttons.addComponent(enableBandSelection);
 
 		mainWindow.addComponent(buttons);
 
@@ -148,6 +151,19 @@ public class SimpleEventTimelineDemo extends Application {
 			public void valueChange(Property.ValueChangeEvent event) {
 				timeline.setEventBandPageSize(Integer.valueOf((String) pageSize
 						.getValue()));
+			}
+		});
+
+		enableBandSelection.addListener(new Button.ClickListener() {
+			@Override
+			public void buttonClick(Button.ClickEvent event) {
+				timeline.setBandSelectionEnabled(!timeline
+						.isBandSelectionEnabled());
+				if (timeline.isBandSelectionEnabled()) {
+					enableBandSelection.setCaption("Disable band selection");
+				} else {
+					enableBandSelection.setCaption("Enable band selection");
+				}
 			}
 		});
 	}

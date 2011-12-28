@@ -41,6 +41,8 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 
 	private int pageNumber;
 
+	private boolean bandSelectionEnabled;
+
 	public VEventTimelineBandArea(VEventTimelineWidget tw) {
 		timelineWidget = tw;
 	}
@@ -380,7 +382,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	 * The first page is 0.
 	 */
 	public void setVisiblePage(int pageNumber) {
-		if (pageNumber < 0) {
+		if (pageNumber < 0 || getPageCount() == 0) {
 			this.pageNumber = 0;
 		} else {
 			if (pageNumber > getPageCount() - 1) {
@@ -435,4 +437,96 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 			}
 		}
 	}
+
+	/**
+	 * Returns true, if the band is in the visible portion of the UI.
+	 * 
+	 * @param bandId
+	 * @return true if the band is visible
+	 */
+	public boolean isBandVisible(int bandId) {
+		VEventTimelineBand band = getBandById(bandId);
+		if (band != null) {
+			int containingPage = getContainingPage(band);
+			return containingPage == getVisiblePage();
+		}
+		return false;
+	}
+
+	/**
+	 * Is called if the band with the given id was selected.
+	 * 
+	 * @param bandId
+	 */
+	public void bandSelected(int bandId) {
+
+		// band selection not enabled
+		if (!bandSelectionEnabled) {
+			return;
+		}
+
+		// nothing to do if the band is already selected
+		if (isBandSelected(bandId)) {
+			return;
+		}
+
+		if (!isBandVisible(bandId)) {
+			navigateToBand(bandId);
+		}
+
+		for (VEventTimelineBand band : allBands) {
+			if (band.getId() == bandId) {
+				band.setSelected(true);
+			} else {
+				band.setSelected(false);
+			}
+		}
+
+		timelineWidget.fireBandSelected(bandId);
+	}
+
+	/**
+	 * Is called to deselect all bands.
+	 */
+	public void deselectBands() {
+		for (VEventTimelineBand band : allBands) {
+			if (band.isSelected()) {
+				band.setSelected(false);
+			}
+		}
+	}
+
+	/**
+	 * Returns true, if the band with the given id is selected.
+	 * 
+	 * @param bandId
+	 * @return
+	 */
+	private boolean isBandSelected(int bandId) {
+		VEventTimelineBand band = getBandById(bandId);
+		return band != null && band.isSelected();
+	}
+
+	/**
+	 * Sets whether the band selection is enabled or not.
+	 * 
+	 * @param bandSelectionEnabled
+	 */
+	public void setBandSelectionEnabled(boolean bandSelectionEnabled) {
+		this.bandSelectionEnabled = bandSelectionEnabled;
+		if (!bandSelectionEnabled) {
+			// deselect all bands
+			deselectBands();
+		}
+	}
+
+	/**
+	 * Returns true, if the band selection is enabled. False otherwise.
+	 * 
+	 * @return
+	 */
+	public boolean isBandSelectionEnabled() {
+		return bandSelectionEnabled;
+	}
+
 }

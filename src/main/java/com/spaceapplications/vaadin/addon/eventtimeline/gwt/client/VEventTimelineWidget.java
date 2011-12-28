@@ -498,6 +498,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setCaption(uidl);
 		setZoomCaption(uidl);
 		setPageNavigationCaptions(uidl);
+		setBandSelectionEnabled(uidl);
 		setSelectionLock(uidl);
 		setDateFormatInfo(uidl);
 		setLocale(uidl);
@@ -513,6 +514,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setZoomLevels(uidl);
 		setZoomCaption(uidl);
 		setPageNavigationCaptions(uidl);
+		setBandSelectionEnabled(uidl);
 
 		setZoomVisibility(uidl);
 		setPageNavigationVisibility(uidl);
@@ -639,7 +641,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			}
 		}
 	}
-
+	
 	private void setPageNavigationCaptions(UIDL uidl) {
 		if (uidl.hasAttribute("bpgingCaption")) {
 			String caption = uidl.getStringAttribute("bpgingCaption");
@@ -655,6 +657,19 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		if (uidl.hasAttribute("bpgingCptNext")) {
 			String caption = uidl.getStringAttribute("bpgingCptNext");
 			nextPage.setText(caption);
+		}
+	}
+	
+	
+	private void setBandSelectionEnabled(UIDL uidl) {
+		boolean bandSelectionEnabled = false;
+		boolean oldValue = bandArea.isBandSelectionEnabled();
+		if (uidl.hasAttribute("bandSelectionEnabled")) {
+			bandSelectionEnabled = uidl.getBooleanAttribute("bandSelectionEnabled");
+		}
+		
+		if(oldValue != bandSelectionEnabled){
+			bandArea.setBandSelectionEnabled(bandSelectionEnabled);
 		}
 	}
 
@@ -931,6 +946,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setGridColor(uidl);
 		setZoomCaption(uidl);
 		setPageNavigationCaptions(uidl);
+		setBandSelectionEnabled(uidl);
 		setDateFormatInfo(uidl);
 
 		// Data received
@@ -1331,6 +1347,15 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	public void fireBandNavigationClickEvent() {
 		client.updateVariable(uidlId, "bandPage", bandArea.getVisiblePage(),
 				true);
+	}
+
+	/**
+	 * Fires a band selected event.
+	 * 
+	 * @param bandId
+	 */
+	public void fireBandSelected(int bandId) {
+		client.updateVariable(uidlId, "bandSel", bandId, true);
 	}
 
 	/**

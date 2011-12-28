@@ -148,6 +148,9 @@ public class EventTimeline extends AbstractComponent implements
 	// Is the page navigation visible
 	protected boolean pageNavigationVisible;
 
+	// Is the band selection enabled
+	protected boolean bandSelectionEnabled;
+
 	// The graph grid color (as CSS3 style rgba string)
 	protected String gridColor = "rgba(192,192,192,1)";
 
@@ -248,6 +251,49 @@ public class EventTimeline extends AbstractComponent implements
 		 *            to the event
 		 */
 		public EventButtonClickEvent(Component source, Object itemId) {
+			super(source);
+			id = itemId;
+		}
+
+		/**
+		 * Gets the item id:s in the event data source which are related to the
+		 * event
+		 * 
+		 * @return The item id:s related to the event
+		 */
+		public Object getItemId() {
+			return id;
+		}
+	}
+
+	/**
+	 * Band selection event. This event is sent when a user clicks a band in the
+	 * graph.
+	 */
+	public class BandSelectionEvent extends Component.Event {
+
+		private Object id;
+
+		/**
+		 * See {@link Component.Event} for details.
+		 * 
+		 * @param source
+		 *            The source of the event
+		 */
+		public BandSelectionEvent(Component source) {
+			super(source);
+		}
+
+		/**
+		 * See {@link Component.Event} for more details.
+		 * 
+		 * @param source
+		 *            The source of the event
+		 * @param itemIds
+		 *            The item id:s in the event data source which are related
+		 *            to the event
+		 */
+		public BandSelectionEvent(Component source, Object itemId) {
 			super(source);
 			id = itemId;
 		}
@@ -659,6 +705,13 @@ public class EventTimeline extends AbstractComponent implements
 	}
 
 	/**
+	 * The band selected listener interface
+	 */
+	public interface BandSelectionListener {
+		public void bandSelected(BandSelectionEvent event);
+	}
+
+	/**
 	 * The band paging listener interface
 	 */
 	public interface PageNavigationListener {
@@ -671,6 +724,7 @@ public class EventTimeline extends AbstractComponent implements
 	private static final Method DATERANGE_CHANGED_METHOD;
 	private static final Method EVENT_CLICK_METHOD;
 	private static final Method PAGE_NAVIGATION_METHOD;
+	private static final Method BAND_SELECTION_METHOD;
 
 	static {
 		try {
@@ -684,6 +738,10 @@ public class EventTimeline extends AbstractComponent implements
 			PAGE_NAVIGATION_METHOD = PageNavigationListener.class
 					.getDeclaredMethod("requestNavigation",
 							new Class[] { PageNavigationEvent.class });
+
+			BAND_SELECTION_METHOD = BandSelectionListener.class
+					.getDeclaredMethod("bandSelected",
+							new Class[] { BandSelectionEvent.class });
 
 		} catch (final java.lang.NoSuchMethodException e) {
 			// This should never happen
@@ -781,6 +839,12 @@ public class EventTimeline extends AbstractComponent implements
 			int page = (Integer) variables.get("bandPage");
 			fireBandPagingEvent(page);
 		}
+
+		// The user selected a band
+		if (variables.containsKey("bandSel")) {
+			int bandId = (Integer) variables.get("bandSel");
+			fireBandSelectionEvent(bandId);
+		}
 	}
 
 	/*
@@ -864,6 +928,7 @@ public class EventTimeline extends AbstractComponent implements
 			target.addAttribute("dateSelectEnabled", dateSelectEnabled);
 			target.addAttribute("legendVisibility", legendVisible);
 			target.addAttribute("bandPagingVisible", pageNavigationVisible);
+			target.addAttribute("bandSelectionEnabled", bandSelectionEnabled);
 			sendComponentVisibilities = false;
 		}
 
@@ -1145,6 +1210,16 @@ public class EventTimeline extends AbstractComponent implements
 	}
 
 	/**
+	 * Add a band selection listener
+	 * 
+	 * @param listener
+	 *            The listener to be added
+	 */
+	public void addListener(BandSelectionListener listener) {
+		addListener(BandSelectionEvent.class, listener, BAND_SELECTION_METHOD);
+	}
+
+	/**
 	 * Remove a date range listener
 	 * 
 	 * @param listener
@@ -1167,6 +1242,26 @@ public class EventTimeline extends AbstractComponent implements
 	 */
 	public void removeListener(EventClickListener listener) {
 		removeListener(EventButtonClickEvent.class, listener);
+	}
+
+	/**
+	 * Remove a page navigation listener
+	 * 
+	 * @param listener
+	 *            The listener to be removed
+	 */
+	public void removeListener(PageNavigationListener listener) {
+		removeListener(PageNavigationEvent.class, listener);
+	}
+
+	/**
+	 * Remove a band selection listener
+	 * 
+	 * @param listener
+	 *            The listener to be removed
+	 */
+	public void removeListener(BandSelectionListener listener) {
+		removeListener(BandSelectionEvent.class, listener);
 	}
 
 	/**
@@ -1200,6 +1295,16 @@ public class EventTimeline extends AbstractComponent implements
 	 */
 	protected void fireBandPagingEvent(int page) {
 		fireEvent(new EventTimeline.PageNavigationEvent(this, page));
+	}
+
+	/**
+	 * Fires a band selection event if the user selected a band.
+	 * 
+	 * @param page
+	 *            The id of the selected band.
+	 */
+	protected void fireBandSelectionEvent(int bandId) {
+		fireEvent(new EventTimeline.BandSelectionEvent(this, bandId));
 	}
 
 	/**
@@ -1382,6 +1487,31 @@ public class EventTimeline extends AbstractComponent implements
 	 */
 	public boolean isPageNavigationVisible() {
 		return pageNavigationVisible;
+	}
+
+	/**
+	 * Returns true, if the band selection is enabled. See
+	 * {@link #setBandSelectionEnabled(boolean)} for more details.
+	 * 
+	 * @return
+	 */
+	public boolean isBandSelectionEnabled() {
+		return bandSelectionEnabled;
+	}
+
+	/**
+	 * If the band selection is enabled the selected band will be marked at the
+	 * UI. Additionally band selection events are sent, if the selected band
+	 * changes.
+	 * 
+	 * @param bandSelectionEnabled
+	 */
+	public void setBandSelectionEnabled(boolean bandSelectionEnabled) {
+		this.bandSelectionEnabled = bandSelectionEnabled;
+		sendComponentVisibilities = true;
+		if (initDone) {
+			requestRepaint();
+		}
 	}
 
 	/**
