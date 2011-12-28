@@ -641,7 +641,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			}
 		}
 	}
-	
+
 	private void setPageNavigationCaptions(UIDL uidl) {
 		if (uidl.hasAttribute("bpgingCaption")) {
 			String caption = uidl.getStringAttribute("bpgingCaption");
@@ -659,17 +659,15 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			nextPage.setText(caption);
 		}
 	}
-	
-	
+
 	private void setBandSelectionEnabled(UIDL uidl) {
-		boolean bandSelectionEnabled = false;
-		boolean oldValue = bandArea.isBandSelectionEnabled();
 		if (uidl.hasAttribute("bandSelectionEnabled")) {
-			bandSelectionEnabled = uidl.getBooleanAttribute("bandSelectionEnabled");
-		}
-		
-		if(oldValue != bandSelectionEnabled){
-			bandArea.setBandSelectionEnabled(bandSelectionEnabled);
+			boolean bandSelectionEnabled = uidl
+					.getBooleanAttribute("bandSelectionEnabled");
+			boolean oldValue = bandArea.isBandSelectionEnabled();
+			if (oldValue != bandSelectionEnabled) {
+				bandArea.setBandSelectionEnabled(bandSelectionEnabled);
+			}
 		}
 	}
 
