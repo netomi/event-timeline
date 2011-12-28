@@ -272,7 +272,7 @@ public class EventTimeline extends AbstractComponent implements
 	 */
 	public class BandSelectionEvent extends Component.Event {
 
-		private Object id;
+		private int id;
 
 		/**
 		 * See {@link Component.Event} for details.
@@ -289,22 +289,20 @@ public class EventTimeline extends AbstractComponent implements
 		 * 
 		 * @param source
 		 *            The source of the event
-		 * @param itemIds
-		 *            The item id:s in the event data source which are related
-		 *            to the event
+		 * @param id
+		 *            The band id.
 		 */
-		public BandSelectionEvent(Component source, Object itemId) {
+		public BandSelectionEvent(Component source, int id) {
 			super(source);
-			id = itemId;
+			this.id = id;
 		}
 
 		/**
-		 * Gets the item id:s in the event data source which are related to the
-		 * event
+		 * Returns the id of the selected band.
 		 * 
-		 * @return The item id:s related to the event
+		 * @return The band id.
 		 */
-		public Object getItemId() {
+		public int getBandId() {
 			return id;
 		}
 	}
@@ -1418,6 +1416,22 @@ public class EventTimeline extends AbstractComponent implements
 	 */
 	public List<BandInfo> getBandInfos() {
 		return Collections.unmodifiableList(new ArrayList<BandInfo>(bandInfos));
+	}
+
+	/**
+	 * Returns the band info for the given bandId or <code>null</code> if no
+	 * band could be found.
+	 * 
+	 * @param bandId
+	 * @return
+	 */
+	public BandInfo getBand(int bandId) {
+		for (BandInfo info : bandInfos) {
+			if (info.getBandId() == bandId) {
+				return info;
+			}
+		}
+		return null;
 	}
 
 	/**
