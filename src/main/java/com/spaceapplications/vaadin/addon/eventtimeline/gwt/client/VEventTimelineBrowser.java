@@ -259,6 +259,10 @@ public class VEventTimelineBrowser extends Widget implements VDataListener,
 				currentEvents.put(band, bandEvents);
 			}
 
+			// TODO - Thomas -> what do you think about #clear()?
+			// Should be OK since events always contains all events
+			bandEvents.clear();
+			
 			bandEvents.addAll(events);
 		}
 	}
