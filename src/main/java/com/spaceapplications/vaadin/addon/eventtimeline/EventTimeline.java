@@ -1055,8 +1055,9 @@ public class EventTimeline extends AbstractComponent implements
 	 *            The caption for this band
 	 * @param provider
 	 *            The provider for events displayed in this band
+	 * @return the created band
 	 */
-	public void addEventBand(final String caption,
+	public BandInfo addEventBand(final String caption,
 			final TimelineEventProvider provider) {
 		lastBandId++;
 
@@ -1075,6 +1076,8 @@ public class EventTimeline extends AbstractComponent implements
 
 			requestRepaint();
 		}
+
+		return result;
 	}
 
 	/**
@@ -1148,11 +1151,14 @@ public class EventTimeline extends AbstractComponent implements
 	 *            The end data
 	 */
 	public void setVisibleDateRange(Date start, Date end) {
-		minDate = start;
-		maxDate = end;
 
 		// Do consistency check
 		if (start.equals(end) || end.after(start)) {
+			// new time limits
+			minDate = start;
+			maxDate = end;
+			sendTimeLimits =true;
+
 			selectedStartDate = start;
 			selectedEndDate = end;
 			sendDateRange = true;
