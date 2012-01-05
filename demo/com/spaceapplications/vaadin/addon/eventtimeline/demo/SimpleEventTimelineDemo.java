@@ -1,5 +1,6 @@
 package com.spaceapplications.vaadin.addon.eventtimeline.demo;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -12,13 +13,20 @@ import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEvent;
 import com.spaceapplications.vaadin.addon.eventtimeline.event.TimelineEventProvider;
 import com.vaadin.Application;
 import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.validator.IntegerValidator;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 public class SimpleEventTimelineDemo extends Application {
+	private Date end;
+	private Date start;
+	private EventTimeline timeline;
+
 	@SuppressWarnings("serial")
 	@Override
 	public void init() {
@@ -26,53 +34,78 @@ public class SimpleEventTimelineDemo extends Application {
 
 		setMainWindow(mainWindow);
 
-		HorizontalLayout buttons = new HorizontalLayout();
-		buttons.setSpacing(true);
-		buttons.setMargin(true);
+		// actionbar
+		HorizontalLayout actionbar = new HorizontalLayout();
+		actionbar.setSpacing(true);
+		actionbar.setMargin(true);
+		mainWindow.addComponent(actionbar);
+
+		// date
+		VerticalLayout dateinfo = new VerticalLayout();
+		dateinfo.setSpacing(true);
+		dateinfo.setMargin(true);
+		actionbar.addComponent(dateinfo);
+		final DateField dateField = new DateField("Date selection");
+		dateField.setImmediate(true);
+		dateField.setWriteThrough(true);
+		dateField.addListener(new Property.ValueChangeListener() {
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				buildBands((Date) dateField.getValue());
+			}
+		});
+		dateinfo.addComponent(dateField);
+
+		// band buttons
+		VerticalLayout bandbuttons = new VerticalLayout();
+		bandbuttons.setSpacing(true);
+		bandbuttons.setMargin(true);
+		actionbar.addComponent(bandbuttons);
+
 		Button addBandButton = new Button("Add band");
-		buttons.addComponent(addBandButton);
+		bandbuttons.addComponent(addBandButton);
 
 		Button removeLastBand = new Button("Remove last band");
-		buttons.addComponent(removeLastBand);
+		bandbuttons.addComponent(removeLastBand);
 
-		final TextField pageSize = new TextField("Pagesize");
-		pageSize.setImmediate(true);
-		pageSize.setInvalidAllowed(false);
-		pageSize.addValidator(new IntegerValidator("Only ints are allowed"));
-		buttons.addComponent(pageSize);
+		// event buttons
+		VerticalLayout eventbuttons = new VerticalLayout();
+		eventbuttons.setSpacing(true);
+		eventbuttons.setMargin(true);
+		actionbar.addComponent(eventbuttons);
 
 		Button addEventToLastBand = new Button("Add new event...");
 		addEventToLastBand.setDescription("...to last band");
-		buttons.addComponent(addEventToLastBand);
+		eventbuttons.addComponent(addEventToLastBand);
 
 		Button removeFirstEventFromLastBand = new Button(
 				"Remove first event...");
 		removeFirstEventFromLastBand.setDescription("...from last band");
-		buttons.addComponent(removeFirstEventFromLastBand);
+		eventbuttons.addComponent(removeFirstEventFromLastBand);
 
+		// page
+		VerticalLayout pageinfo = new VerticalLayout();
+		pageinfo.setSpacing(true);
+		pageinfo.setMargin(true);
+		actionbar.addComponent(pageinfo);
+		// page size
+		final TextField pageSize = new TextField("Pagesize");
+		pageSize.setImmediate(true);
+		pageSize.setInvalidAllowed(false);
+		pageSize.addValidator(new IntegerValidator("Only ints are allowed"));
+		pageinfo.addComponent(pageSize);
+
+		// band selection
 		final Button enableBandSelection = new Button("Enable band selection");
-		buttons.addComponent(enableBandSelection);
-
-		mainWindow.addComponent(buttons);
+		pageinfo.addComponent(enableBandSelection);
 
 		// create the timeline
-		final EventTimeline timeline = new EventTimeline("Our event timeline");
+		timeline = new EventTimeline("Our event timeline");
 		timeline.setHeight("500px");
 		timeline.setWidth("100%");
 		timeline.setPageNavigationVisible(true);
 
-		// set the visible time range
-		final Calendar cal = Calendar.getInstance();
-		final Date start = cal.getTime();
-		cal.add(Calendar.HOUR_OF_DAY, 4);
-		final Date end = cal.getTime();
-		timeline.setVisibleDateRange(start, end);
-
-		// add our data sources
-		timeline.addEventBand("Band", createEventProvider(end));
-		timeline.addEventBand("Band2", createEventProvider2(end));
-		timeline.addEventBand("Band3", createEventProvider3(end));
-		timeline.addEventBand("Band4", createEventProvider4(end));
+		buildBands(new Date());
 
 		// Add some zoom levels
 		timeline.addZoomLevel("Hour", 60 * 60 * 1000L);
@@ -107,13 +140,14 @@ public class SimpleEventTimelineDemo extends Application {
 				if (infos.size() > 0) {
 					BasicEventProvider provider = (BasicEventProvider) infos
 							.get(infos.size() - 1).getProvider();
-					List<TimelineEvent> events = provider.getEvents(start, end);
+					List<TimelineEvent> events = provider.getEvents();
 					// create a simple event
 					BasicEvent result = new BasicEvent();
 					result.setEventId(String.valueOf(events.size() + 1));
 
 					// set the visible time range
 					final Calendar cal = Calendar.getInstance();
+					cal.setTime(start);
 					cal.add(Calendar.HOUR, 1);
 					// set the timestamp property
 					result.setStart(cal.getTime());
@@ -168,12 +202,41 @@ public class SimpleEventTimelineDemo extends Application {
 		});
 	}
 
+	/**
+	 * Builds event bands for the given date.
+	 * 
+	 * @param date
+	 */
+	protected void buildBands(Date date) {
+
+		// remove all current existing bands
+		for (EventTimeline.BandInfo info : new ArrayList<EventTimeline.BandInfo>(
+				timeline.getBandInfos())) {
+			timeline.removeEventBand(info.getProvider());
+		}
+
+		// set the visible time range
+		final Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		start = cal.getTime();
+		cal.add(Calendar.HOUR_OF_DAY, 4);
+		end = cal.getTime();
+		timeline.setVisibleDateRange(start, end);
+
+		// add our data sources
+		timeline.addEventBand("Band", createEventProvider(end));
+		timeline.addEventBand("Band2", createEventProvider2(end));
+		timeline.addEventBand("Band3", createEventProvider3(end));
+		timeline.addEventBand("Band4", createEventProvider4(end));
+	}
+
 	public TimelineEventProvider createEventProvider(final Date end) {
 		BasicEventProvider provider = new BasicEventProvider();
 
 		// get events for a whole day
 		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.HOUR, 1);
+		cal.setTime(end);
+		cal.add(Calendar.HOUR, -4);
 		int idx = 0;
 		while (cal.getTime().before(end)) {
 			// create a simple event
