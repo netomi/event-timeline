@@ -129,6 +129,10 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private final TextBox dateTo;
 	private Date intervalStartDate, intervalEndDate;
 
+	// if true, then the current date ranges has to be set to the display and
+	// browser
+	private boolean uiRequiresRangeRefresh;
+
 	// Default UIDL stuff
 	private ApplicationConnection client;
 	private String uidlId;
@@ -548,12 +552,14 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private void setStartDate(UIDL uidl) {
 		if (uidl.hasAttribute("startDate")) {
 			startDate = new Date(uidl.getLongAttribute("startDate"));
+			uiRequiresRangeRefresh = true;
 		}
 	}
 
 	private void setEndDate(UIDL uidl) {
 		if (uidl.hasAttribute("endDate")) {
 			endDate = new Date(uidl.getLongAttribute("endDate"));
+			uiRequiresRangeRefresh = true;
 		}
 	}
 
@@ -729,7 +735,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		if (uidl.hasVariable("selectStart") && uidl.hasVariable("selectEnd")) {
 			selectedStartDate = new Date(uidl.getLongVariable("selectStart"));
 			selectedEndDate = new Date(uidl.getLongVariable("selectEnd"));
-
+			uiRequiresRangeRefresh = true;
 		}
 	}
 
@@ -884,7 +890,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			endDate = new Date(endDate.getTime() + halfDay);
 			selectedStartDate = startDate;
 			selectedEndDate = endDate;
-			display.setRange(selectedStartDate, selectedEndDate);
 			browser.setRange(selectedStartDate, selectedEndDate);
 		}
 	}
@@ -948,6 +953,12 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setBandSelectionEnabled(uidl);
 		setDateFormatInfo(uidl);
 
+		if (isInitDone() && uiRequiresRangeRefresh) {
+			uiRequiresRangeRefresh = false;
+			browser.setRange(selectedStartDate, selectedEndDate);
+			display.setRange(selectedStartDate, selectedEndDate);
+		}
+
 		// Data received
 		List<VEvent> events = null;
 		UIDL bands = uidl.getChildByTagName("events");
@@ -960,8 +971,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 				UIDL child = (UIDL) it.next();
 				if (child != null && "band".equals(child.getTag())) {
 					Integer id = child.getIntAttribute("bandid");
-					
-					// TODO Thomas 
+
+					// TODO Thomas
 					cache.removeFromCache(id);
 					events = getEvents(child);
 					cache.addToCache(id, new Date(startTime),
