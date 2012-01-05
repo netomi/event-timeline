@@ -884,6 +884,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			endDate = new Date(endDate.getTime() + halfDay);
 			selectedStartDate = startDate;
 			selectedEndDate = endDate;
+			display.setRange(selectedStartDate, selectedEndDate);
 			browser.setRange(selectedStartDate, selectedEndDate);
 		}
 	}
