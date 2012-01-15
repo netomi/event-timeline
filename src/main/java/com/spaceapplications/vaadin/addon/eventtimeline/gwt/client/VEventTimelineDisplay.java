@@ -55,6 +55,8 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 			+ "-curtain";
 	public static final String CLASSNAME_EVENT = VEventTimelineWidget.CLASSNAME
 			+ "-event";
+	public static final String CLASSNAME_EVENT_SELECTED = CLASSNAME_EVENT
+			+ "-selected";
 	public static final String CLASSNAME_EVENT_CAPTION = CLASSNAME_EVENT
 			+ "-caption";
 	public static final String CLASSNAME_EVENT_CONTENT = CLASSNAME_EVENT
@@ -986,12 +988,19 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 			currentEndDragDate = new Date(currentEndDate.getTime());
 		}
 
+		// Remove the selected style from the widget again
+		for (VEventLabel w : events) {
+			w.removeStyleName(CLASSNAME_EVENT_SELECTED);
+		}
+
 		// Check if element is a event button
 		for (VEventLabel w : events) {
+			w.removeStyleName(CLASSNAME_EVENT_SELECTED);
 			com.google.gwt.dom.client.Element mouseEventElement = Element
 					.as(mouseEvent.getEventTarget());
 			if (mouseEventElement == w.getElement()
 					|| mouseEventElement.getParentElement() == w.getElement()) {
+				w.addStyleName(CLASSNAME_EVENT_SELECTED);
 				eventClick(w);
 				break;
 			}
