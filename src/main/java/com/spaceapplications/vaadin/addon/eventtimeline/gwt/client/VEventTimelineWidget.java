@@ -985,9 +985,9 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 					// TODO Thomas
 					cache.removeFromCache(id);
+					
 					events = getEvents(child);
-					cache.addToCache(id, new Date(startTime),
-							new Date(endTime), events);
+					cache.addToCache(id, new Date(startTime), new Date(endTime), events);
 
 					display.dataReceived(id, events);
 					browser.dataReceived(id, events);
@@ -1106,8 +1106,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 		isIdle = false;
 
-		GWT.log("trying to retrieve events: start=" + startDate.toString()
-				+ ", end=" + endDate.toString());
+		GWT.log("trying to retrieve events: start=" + startDate.toString() + ", end=" + endDate.toString());
 
 		if (useCache) {
 			boolean gotFromCache = true;

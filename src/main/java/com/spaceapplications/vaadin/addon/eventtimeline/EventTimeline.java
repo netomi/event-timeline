@@ -134,8 +134,7 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
   protected String zoomLevelCaption = "Zoom";
 
   // The captions of the band paging navigation
-  private PageNavigationCaptions pagingCaption = 
-    new PageNavigationCaptions("Pages", "next", "previous");
+  private PageNavigationCaptions pagingCaption = new PageNavigationCaptions("Pages", "next", "previous");
 
   // Is the date select visible
   protected boolean dateSelectVisible = true;
@@ -774,6 +773,17 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
 
     // Initialization data requested from the client side (refresh occurred)
     if (variables.containsKey("init")) {
+      
+      // also re-send all bands
+      if (!sendBands) {
+        sendBands = true;
+        for (BandInfo info : bandInfos) {
+          if (!bandsToBeAdded.contains(info)) {
+            bandsToBeAdded.add(info);
+          }
+        }
+      }
+      
       initDataFlags();
       requestRepaint();
     }
