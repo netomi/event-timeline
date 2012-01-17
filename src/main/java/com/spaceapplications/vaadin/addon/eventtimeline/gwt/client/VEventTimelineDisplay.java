@@ -154,8 +154,7 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 		// Add the components
 		displayComponentPanel = new AbsolutePanel();
 		browserRoot.appendChild(displayComponentPanel.getElement());
-		DOM.setStyleAttribute(displayComponentPanel.getElement(), "position",
-				"relative");
+		DOM.setStyleAttribute(displayComponentPanel.getElement(), "position", "relative");
 
 		// Add the canvas
 		canvas = new Canvas(100, 100);
@@ -278,8 +277,7 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 		while (time <= endTime) {
 			if (time >= startTime - unitTime && time <= endTime + unitTime) {
 				Label lbl = new Label();
-				lbl.setStyleName(leftAlign ? CLASSNAME_SCALEDATE_LEFT
-						: CLASSNAME_SCALEDATE);
+				lbl.setStyleName(leftAlign ? CLASSNAME_SCALEDATE_LEFT : CLASSNAME_SCALEDATE);
 				lbl.setWidth(width + "px");
 				Date date = new Date(time);
 
@@ -304,8 +302,7 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 				 * Month resolution is not so easy since it changes depending on
 				 * the month. We use the Date to resolve the new time
 				 */
-				time += DateTimeService.getNumberOfDaysInMonth(new Date(time))
-						* DAY;
+				time += DateTimeService.getNumberOfDaysInMonth(new Date(time)) * DAY;
 			} else if (unitTime == YEAR) {
 				/*
 				 * Take leap years into account

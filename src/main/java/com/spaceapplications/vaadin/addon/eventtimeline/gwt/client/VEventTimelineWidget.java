@@ -39,11 +39,9 @@ import com.vaadin.terminal.gwt.client.VConsole;
  * VEventTimelineWidget, based on original version from vaadin-timeline
  * 
  * @author Thomas Neidhart / Space Applications Services NV/SA
+ * @author Florian Pirchner (add / remove bands)
  * @author Peter Lehto / IT Mill Oy Ltd
  * @author John Ahlroos / IT Mill Oy Ltd
- *         <p/>
- *         Contributors:<br/>
- *         Florian Pirchner <florian.pirchner@gmail.com> Add / remove bands
  */
 public class VEventTimelineWidget extends Composite implements Paintable {
 
@@ -161,6 +159,9 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private Date startDate = null;
 	private Date endDate = null;
 
+	// Band height property
+	private int bandHeight = -1;
+	
 	// Zoom levels
 	private final Map<Anchor, Long> zoomLevels = new HashMap<Anchor, Long>();
 
@@ -176,8 +177,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private DateTimeFormat displayFormat = DateTimeFormat.getFormat("MMM d, y");
 	private DateTimeFormat editFormat = DateTimeFormat.getFormat("dd-MM-yyyy");
 
-	private final DateTimeFormat dateformat_date = DateTimeFormat
-			.getFormat("yyyy-MM-dd");
+	private final DateTimeFormat dateformat_date = DateTimeFormat.getFormat("yyyy-MM-dd");
 
 	// Data Cache
 	private VClientCache cache = new VClientCache(this);
@@ -506,6 +506,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setSelectionLock(uidl);
 		setDateFormatInfo(uidl);
 		setLocale(uidl);
+		setBandHeight(uidl);
 
 		return true;
 	}
@@ -529,6 +530,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 		setDateFormatInfo(uidl);
 		setLocale(uidl);
+    setBandHeight(uidl);
 
 		setSelectionLock(uidl);
 		setSelectionRange(uidl);
@@ -636,6 +638,16 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		}
 	}
 
+	private void setBandHeight(UIDL uidl) {
+	  if (uidl.hasAttribute("bandheight")) {
+	    bandHeight = uidl.getIntAttribute("bandheight");
+	  }
+	}
+
+	protected int getBandHeight() {
+	  return bandHeight;
+	}
+	
 	private void setPageNavigationVisibility(UIDL uidl) {
 		if (uidl.hasAttribute("bandPagingVisible")) {
 			bandPagingVisible = uidl.getBooleanAttribute("bandPagingVisible");
@@ -854,8 +866,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		}
 
 		if (removedBands.size() > 0) {
-			Integer[] bandIds = removedBands.toArray(new Integer[removedBands
-					.size()]);
+			Integer[] bandIds = removedBands.toArray(new Integer[removedBands.size()]);
 			display.dataRemoved(bandIds);
 			browser.dataRemoved(bandIds);
 		}
@@ -1358,8 +1369,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	 * Fires a event band navigation click event
 	 */
 	public void fireBandNavigationClickEvent() {
-		client.updateVariable(uidlId, "bandPage", bandArea.getVisiblePage(),
-				true);
+		client.updateVariable(uidlId, "bandPage", bandArea.getVisiblePage(), true);
 	}
 
 	/**

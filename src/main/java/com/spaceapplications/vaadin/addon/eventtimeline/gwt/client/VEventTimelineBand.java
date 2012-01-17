@@ -166,9 +166,7 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler,
 		int center = bandRoot.getOffsetWidth() / 2 - 8;
 		DOM.setStyleAttribute(bandAdjuster, "left", center + "px");
 
-		int bottom = bandRoot.getOffsetHeight() - bandLabel.getOffsetHeight()
-				- 4;
-
+		int bottom = bandRoot.getOffsetHeight() - bandLabel.getOffsetHeight() - 4;
 		DOM.setStyleAttribute(bandAdjuster, "top", bottom + "px");
 	}
 

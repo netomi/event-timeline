@@ -14,7 +14,7 @@ import java.util.List;
 public class BasicEvent implements TimelineEvent, TimelineEvent.EventChangeNotifier {
   private static final long serialVersionUID = 1L;
  
-     private String eventId;
+  private String eventId;
   private String caption;
   private String description;
   private Date end;

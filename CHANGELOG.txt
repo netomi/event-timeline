@@ -1,6 +1,18 @@
                                      EVENT TIMELINE
                                   Development Changelog
 
+Version 0.5.0 - 17.01.2012
+--------------------------
+
+   - added support for dynamically adding / removing bands (fixes issue #7)
+       contributed by Florian Pirchner
+   - added support for band selection (fixes issue #9)
+       contributed by Florian Pirchner
+   - added support for paging of event bands
+       contributed by Florian Pirchner
+   - event label description can now be any HTML content (fixes issue #2)
+   - added support for explicitly setting the band height (fixes issue #8)
+   
 Version 0.4.0 - 08.12.2011
 --------------------------
 

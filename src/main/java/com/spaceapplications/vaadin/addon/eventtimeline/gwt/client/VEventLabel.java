@@ -35,7 +35,6 @@ public class VEventLabel extends Label {
 
     Element eventContent = DOM.createDiv();
     eventContent.addClassName(VEventTimelineDisplay.CLASSNAME_EVENT_CONTENT);
-    // TODO Thomas -> For me it is a pretty good way. What do you think?
     eventContent.setInnerHTML(event.getDescription());
     getElement().appendChild(eventContent);
 

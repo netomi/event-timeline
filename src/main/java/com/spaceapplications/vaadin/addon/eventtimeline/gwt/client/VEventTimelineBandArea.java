@@ -21,9 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
  * VEventTimelineBandArea.
  * 
  * @author Thomas Neidhart / Space Applications Services NV/SA
- *         <p/>
- *         Contributors:<br/>
- *         Florian Pirchner <florian.pirchner@gmail.com> Add / remove bands
+ * @author Florian Pirchner (add / remove bands)
  */
 public class VEventTimelineBandArea extends VerticalPanel implements
 		MouseOverHandler, MouseOutHandler {
@@ -92,8 +90,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		VEventTimelineBand band = new VEventTimelineBand(id, caption, this);
 		allBands.add(band);
 
-		// TODO: currently the band heights are set to default 45 px -> make
-		// configurable
+		// TODO: currently the band heights are set to default 45 px -> make configurable
 		bandMinimumHeights.add(20);
 	}
 
@@ -150,6 +147,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 				// add the band
 				add(band);
 				visibleBands.add(band);
+				band.updateBandAdjuster();
 			}
 		} else {
 			int height = calcHeight(allBands.size());
@@ -160,6 +158,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 				// add the band
 				add(band);
 				visibleBands.add(band);
+				band.updateBandAdjuster();
 			}
 		}
 	}
@@ -171,13 +170,16 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	 *            The number of visible event bands
 	 */
 	protected int calcHeight(int pageSize) {
-		int bandHeight = 0;
-		int calcBase = pageSize <= 0 ? allBands.size() : pageSize;
-		if (calcBase > 0) {
-			bandHeight = (getParent().getOffsetHeight()
-					- timelineWidget.getBrowserHeight() - 16)
-					/ calcBase;
-		}
+	  int bandHeight = timelineWidget.getBandHeight();
+	  
+	  // only adjust height if no specific height is configured
+	  if (bandHeight == -1) {
+	    int calcBase = pageSize <= 0 ? allBands.size() : pageSize;
+	    if (calcBase > 0) {
+	      bandHeight = (getParent().getOffsetHeight()
+	          - timelineWidget.getBrowserHeight() - 16) / calcBase;
+	    }
+	  }
 
 		return bandHeight;
 	}
@@ -218,7 +220,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 				}
 			}
 
-			// if the page is valide, navigate to it
+			// if the page is valid, navigate to it
 			if (page >= 0) {
 				setVisiblePage(page);
 			}
@@ -291,8 +293,7 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 		}
 
 		// maximum height of the parent widget
-		int maxHeight = getParent().getOffsetHeight()
-				- timelineWidget.getBrowserHeight() - 16;
+		int maxHeight = getParent().getOffsetHeight() - timelineWidget.getBrowserHeight() - 16;
 
 		int totalHeight = 0;
 		for (int idx = 0; idx < getWidgetCount(); idx++) {
