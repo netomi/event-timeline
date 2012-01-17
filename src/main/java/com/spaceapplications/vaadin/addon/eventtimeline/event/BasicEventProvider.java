@@ -3,6 +3,7 @@
  */
 package com.spaceapplications.vaadin.addon.eventtimeline.event;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -30,24 +31,28 @@ public class BasicEventProvider implements TimelineEventProvider,
 
 	private static final long serialVersionUID = 1L;
 
-	protected Set<TimelineEvent> eventList = new TreeSet<TimelineEvent>(
-			new Comparator<TimelineEvent>() {
-				@Override
-				public int compare(TimelineEvent o1, TimelineEvent o2) {
-					int diff = o1.getStart().compareTo(o2.getStart());
-					if (diff != 0) {
-						return diff;
-					} else {
-						diff = o1.getEnd().compareTo(o2.getEnd());
-						if (diff != 0) {
-							return diff;
-						} else {
-							return o1.getEventId().compareTo(o2.getEventId());
-						}
-					}
-				}
-			});
+	protected Set<TimelineEvent> eventList = new TreeSet<TimelineEvent>(new EventComparator());
 
+	private static class EventComparator implements Comparator<TimelineEvent>, Serializable {
+	  
+    private static final long serialVersionUID = -3838480424724696804L;
+
+    @Override
+    public int compare(TimelineEvent o1, TimelineEvent o2) {
+      int diff = o1.getStart().compareTo(o2.getStart());
+      if (diff != 0) {
+        return diff;
+      } else {
+        diff = o1.getEnd().compareTo(o2.getEnd());
+        if (diff != 0) {
+          return diff;
+        } else {
+          return o1.getEventId().compareTo(o2.getEventId());
+        }
+      }
+    }
+	}
+	
 	private List<EventSetChangeListener> listeners = new ArrayList<EventSetChangeListener>();
 
 	/**

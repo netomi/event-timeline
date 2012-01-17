@@ -36,8 +36,9 @@ import com.vaadin.ui.Component;
  * @author John Ahlroos / IT Mill Oy Ltd 2010
  */
 @ClientWidget(value = VEventTimelineWidget.class, loadStyle = LoadStyle.EAGER)
-@SuppressWarnings({ "serial" })
 public class EventTimeline extends AbstractComponent implements EventSetChangeListener {
+
+  private static final long serialVersionUID = 6595058445231789530L;
 
   // The style name
   private static final String STYLENAME = "v-eventtimeline";
@@ -175,6 +176,8 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
    */
   public class DateRangeChangedEvent extends Component.Event {
 
+    private static final long serialVersionUID = -5424380516338748718L;
+
     private Date startDate;
 
     private Date endDate;
@@ -231,6 +234,8 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
    */
   public class EventButtonClickEvent extends Component.Event {
 
+    private static final long serialVersionUID = 1215106616175652769L;
+    
     private Object id;
 
     /**
@@ -271,6 +276,8 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
    */
   public class BandSelectionEvent extends Component.Event {
 
+    private static final long serialVersionUID = -621449416684203285L;
+    
     private int id;
 
     /**
@@ -311,6 +318,8 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
    */
   public class PageNavigationEvent extends Component.Event {
 
+    private static final long serialVersionUID = -5391363403702750953L;
+    
     private final int page;
 
     /**
@@ -342,6 +351,8 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
    */
   public class DateFormatInfo implements Serializable {
 
+    private static final long serialVersionUID = -3103432458378549206L;
+    
     private String dateSelectDisplaySimpleDateFormat = "MMM d, y";
     private String dateSelectEditSimpleDateFormat = "dd/MM/yyyy";
     private String shortYearFormat = "''yy";
@@ -1762,7 +1773,10 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
   /**
    * Can be used to specify the captions of the band paging navigation element.
    */
-  public static class PageNavigationCaptions {
+  public static class PageNavigationCaptions implements Serializable {
+
+    private static final long serialVersionUID = 7731112570587996160L;
+    
     private final String caption;
     private final String caption_next;
     private final String caption_previous;
@@ -1815,7 +1829,10 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
   /**
    * Class describing the
    */
-  public static class BandInfo {
+  public static class BandInfo implements Serializable {
+    
+    private static final long serialVersionUID = 6388755571992132307L;
+    
     private final int bandId;
     private final TimelineEventProvider provider;
     private String caption;
