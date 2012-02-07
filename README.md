@@ -1,7 +1,7 @@
 EVENT TIMELINE
 ==============
 
-The Event Timeline is a widget for the vaadin web-development framework. 
+The Event Timeline (http://vaadin.com/directory#addon/event-timeline) is a widget for the vaadin web-development framework. 
 It is inspired by the NASA OSTPV (Onboard Short Term Plan Viewer) application to display mission plans and timelines.
 
 The widget is derived from the Vaadin Timeline (http://vaadin.com/directory#addon/vaadin-timeline), and modified to support events rather than data graphs. 
