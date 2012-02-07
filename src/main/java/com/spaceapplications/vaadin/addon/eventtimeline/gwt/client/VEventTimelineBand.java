@@ -26,12 +26,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class VEventTimelineBand extends Widget implements MouseDownHandler,
 		MouseMoveHandler, MouseUpHandler, NativePreviewHandler {
 
-	private static final String CLASSNAME_BAND = VEventTimelineWidget.CLASSNAME
-			+ "-band";
-	private static final String CLASSNAME_BAND_SELECTED = CLASSNAME_BAND
-			+ "-selected";
-	private static final String CLASSNAME_BAND_LABEL = CLASSNAME_BAND
-			+ "-label";
+	private static final String CLASSNAME_BAND = VEventTimelineWidget.CLASSNAME	+ "-band";
+	private static final String CLASSNAME_BAND_SELECTED = CLASSNAME_BAND + "-selected";
+	private static final String CLASSNAME_BAND_LABEL = CLASSNAME_BAND	+ "-label";
 	private static final String CLASSNAME_BAND_ADJUSTER = "v-band-adjuster";
 
 	private final Element bandRoot;
@@ -46,15 +43,20 @@ public class VEventTimelineBand extends Widget implements MouseDownHandler,
 
 	private int dragStartY;
 
-	private HandlerRegistration mouseMoveReg, mouseUpReg, mouseDownReg,
-			preview;
+	private HandlerRegistration mouseMoveReg, mouseUpReg, mouseDownReg,	preview;
 
 	private int bandId;
 	private VEventTimelineBandArea bandArea;
 	private boolean selected;
 
-	public VEventTimelineBand(int bandId, final String caption,
-			final VEventTimelineBandArea bandArea) {
+	/**
+	 * Create a new band.
+	 * 
+	 * @param bandId the band id
+	 * @param caption the caption
+	 * @param bandArea the ui element representing the band
+	 */
+	public VEventTimelineBand(int bandId, final String caption,	final VEventTimelineBandArea bandArea) {
 		this.bandId = bandId;
 		this.bandArea = bandArea;
 

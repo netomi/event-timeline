@@ -57,22 +57,15 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private static final String CLASSNAME_ZOOMBAR = CLASSNAME + "-zoombar";
 	private static final String CLASSNAME_ZOOMBARLABEL = CLASSNAME + "-label";
 	private static final String CLASSNAME_DATEFIELD = CLASSNAME + "-datefield";
-	private static final String CLASSNAME_DATEFIELDEDIT = CLASSNAME_DATEFIELD
-			+ "-edit";
+	private static final String CLASSNAME_DATEFIELDEDIT = CLASSNAME_DATEFIELD	+ "-edit";
 	private static final String CLASSNAME_DATERANGE = CLASSNAME + "-daterange";
 	private static final String CLASSNAME_LEGEND = CLASSNAME + "-legend";
-	private static final String CLASSNAME_MODELEGEND_ROW = CLASSNAME
-			+ "-modelegend";
-	private static final String CLASSNAME_BANDPAGE = CLASSNAME
-			+ "-pagenavigation";
-	private static final String CLASSNAME_BANDPAGE_LABEL = CLASSNAME_BANDPAGE
-			+ "-label";
-	private static final String CLASSNAME_BANDPAGE_NEXT = CLASSNAME_BANDPAGE
-			+ "-next";
-	private static final String CLASSNAME_BANDPAGE_PREVIOUS = CLASSNAME_BANDPAGE
-			+ "-previous";
-	private static final String CLASSNAME_BANDPAGE_PAGENUMBER = CLASSNAME_BANDPAGE
-			+ "-pagenumber";
+	private static final String CLASSNAME_MODELEGEND_ROW = CLASSNAME + "-modelegend";
+	private static final String CLASSNAME_BANDPAGE = CLASSNAME + "-pagenavigation";
+	private static final String CLASSNAME_BANDPAGE_LABEL = CLASSNAME_BANDPAGE + "-label";
+	private static final String CLASSNAME_BANDPAGE_NEXT = CLASSNAME_BANDPAGE + "-next";
+	private static final String CLASSNAME_BANDPAGE_PREVIOUS = CLASSNAME_BANDPAGE + "-previous";
+	private static final String CLASSNAME_BANDPAGE_PAGENUMBER = CLASSNAME_BANDPAGE + "-pagenumber";
 
 	public static final String ATTR_DATE = "date";
 	public static final String ATTR_STYLE = "css";
@@ -127,8 +120,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private final TextBox dateTo;
 	private Date intervalStartDate, intervalEndDate;
 
-	// if true, then the current date ranges has to be set to the display and
-	// browser
+	// if true, then the current date ranges has to be set to the display and browser
 	private boolean uiRequiresRangeRefresh;
 
 	// Default UIDL stuff
@@ -137,7 +129,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 	// Initialization
 	private boolean initStage1Done = false;
-	private boolean initStage2Done = false;
 	private boolean initDone = false;
 	private boolean noDataAvailable = false;
 	private Date selectedStartDate, selectedEndDate;
@@ -181,6 +172,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 	// Data Cache
 	private VClientCache cache = new VClientCache(this);
+	private boolean runningDataRequest = false;
 
 	// Band Navigation
 	private HorizontalPanel pageNavigationBar;
@@ -357,8 +349,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		modeLegendBar.setHeight("31px");
 		modeLegendBar.setStyleName(CLASSNAME_MODELEGEND_ROW);
 		modeLegendBar.add(legend);
-		modeLegendBar.setCellHorizontalAlignment(legend,
-				HorizontalPanel.ALIGN_RIGHT);
+		modeLegendBar.setCellHorizontalAlignment(legend, HorizontalPanel.ALIGN_RIGHT);
 
 		root.add(modeLegendBar);
 
@@ -507,46 +498,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setDateFormatInfo(uidl);
 		setLocale(uidl);
 		setBandHeight(uidl);
-
-		return true;
-	}
-
-	private boolean init2(UIDL uidl) {
-		setStartDate(uidl);
-		setEndDate(uidl);
-
-		setGridColor(uidl);
-		setZoomLevels(uidl);
-		setZoomCaption(uidl);
-		setPageNavigationCaptions(uidl);
-		setBandSelectionEnabled(uidl);
-
-		setZoomVisibility(uidl);
-		setPageNavigationVisibility(uidl);
-		setDateSelectEnabled(uidl);
-		setDateSelectVisibility(uidl);
-		setBrowserVisibility(uidl);
-		setLegendVisibility(uidl);
-
-		setDateFormatInfo(uidl);
-		setLocale(uidl);
-    setBandHeight(uidl);
-
-		setSelectionLock(uidl);
-		setSelectionRange(uidl);
-
-		setBands(uidl);
-
-		handleOnePointGraph();
-
-		display.setRange(selectedStartDate, selectedEndDate);
-
-		browser.setRange(selectedStartDate, selectedEndDate);
-		if (browserIsVisible) {
-			browser.refresh();
-		}
-
-		setNoData(uidl);
 
 		return true;
 	}
@@ -932,15 +883,9 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			return;
 
 			// Initialization done
-		} else if (!initStage2Done) {
-			initStage2Done = init2(uidl);
-
-			return;
-
-		} else if (!initDone) {
-			initDone = true;
 		}
 
+    setBandHeight(uidl);
 		setCaption(uidl);
 		setBands(uidl);
 		setLocale(uidl);
@@ -957,17 +902,23 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setDateSelectVisibility(uidl);
 		setDateSelectEnabled(uidl);
 		setLegendVisibility(uidl);
+    setPageNavigationVisibility(uidl);
+		
 		setZoomLevels(uidl);
 		setGridColor(uidl);
 		setZoomCaption(uidl);
+		
 		setPageNavigationCaptions(uidl);
 		setBandSelectionEnabled(uidl);
 		setDateFormatInfo(uidl);
 
-		if (isInitDone() && uiRequiresRangeRefresh) {
+		if (isInitDone() || uiRequiresRangeRefresh) {
 			uiRequiresRangeRefresh = false;
 			browser.setRange(selectedStartDate, selectedEndDate);
 			display.setRange(selectedStartDate, selectedEndDate);
+	    if (browserIsVisible) {
+	      browser.refresh();
+	    }
 		}
 
 		// Data received
@@ -996,11 +947,16 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 
 			display.dataReceivedAll();
 			browser.dataReceivedAll();
+			runningDataRequest = false;
 
 			display.redraw();
 		}
 
 		setDirty(uidl);
+		
+		if (!initDone) {
+	      initDone = true;
+		}
 	}
 
 	private void setNoData(UIDL uidl) {
@@ -1087,7 +1043,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	}
 
 	/**
-	 * Get data from server
+	 * Get data from server.
 	 * 
 	 * @param component
 	 *            The component which need the events
@@ -1098,7 +1054,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	 * @return Was the data fetched from the cache
 	 */
 	public boolean getEvents(VDataListener component, Date startDate,
-			Date endDate, boolean useCache) {
+	                         Date endDate, boolean useCache) {
 
 		if (!component.isVisible()) {
 			return true;
@@ -1111,10 +1067,8 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		if (useCache) {
 			boolean gotFromCache = true;
 			for (VEventTimelineBand band : bandArea.getAllBands()) {
-				List<VEvent> events = cache.getFromCache(band.getId(),
-						startDate, endDate);
+				List<VEvent> events = cache.getFromCache(band.getId(), startDate, endDate);
 				if (events == null) {
-					GWT.log("got empty cache for band " + band.getId());
 					gotFromCache = false;
 					break;
 				} else {
@@ -1125,21 +1079,21 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 			component.dataReceivedAll();
 
 			if (gotFromCache) {
-				GWT.log("found in cache");
 				return true;
 			}
 		}
 
-		GWT.log("retrieve from server");
+		if (!runningDataRequest) {
+		  GWT.log("retrieve from server");
 
-		// if the data could not be found in the cache, get it from the server
-		client.updateVariable(
-				uidlId,
-				"events",
-				new Object[] { Long.valueOf(startDate.getTime()),
-						Long.valueOf(endDate.getTime()) }, false);
+		  // if the data could not be found in the cache, get it from the server
+		  client.updateVariable(uidlId, "events",
+				                    new Object[] { Long.valueOf(startDate.getTime()),
+		                                       Long.valueOf(endDate.getTime()) },
+		                        false);
 
-		getFromServer();
+		  getFromServer();
+		}
 
 		return false;
 	}
@@ -1208,6 +1162,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	 * Issues a get request to fetch the requested data points
 	 */
 	public void getFromServer() {
+	  runningDataRequest = true;
 		client.updateVariable(uidlId, "send", true, true);
 	}
 

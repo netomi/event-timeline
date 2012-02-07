@@ -89,8 +89,6 @@ public class VEventTimelineBandArea extends VerticalPanel implements
 	public void addBand(int id, String caption) {
 		VEventTimelineBand band = new VEventTimelineBand(id, caption, this);
 		allBands.add(band);
-
-		// TODO: currently the band heights are set to default 45 px -> make configurable
 		bandMinimumHeights.add(20);
 	}
 

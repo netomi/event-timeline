@@ -1,6 +1,16 @@
                                      EVENT TIMELINE
                                   Development Changelog
 
+Version 0.6.0 - xx.xx.2012
+--------------------------
+
+   - improved initialization procedure (reduced steps and requests)
+   
+Version 0.5.1 - 17.01.2012
+--------------------------
+
+   - re-sending event bands after browser reload
+
 Version 0.5.0 - 17.01.2012
 --------------------------
 

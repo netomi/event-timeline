@@ -50,22 +50,14 @@ public class VEventTimelineBrowser extends Widget implements VDataListener,
 		MouseDownHandler, MouseMoveHandler, MouseUpHandler, MouseWheelHandler,
 		DoubleClickHandler, NativePreviewHandler {
 
-	private static final String CLASSNAME_CANVAS = VEventTimelineWidget.BROWSER_CLASSNAME
-			+ "-canvas";
-	private static final String CLASSNAME_SCROLLBAR = VEventTimelineWidget.BROWSER_CLASSNAME
-			+ "-scrollbar";
-	private static final String CLASSNAME_SCROLLBAR_LEFT = CLASSNAME_SCROLLBAR
-			+ "-left";
-	private static final String CLASSNAME_SCROLLBAR_RIGHT = CLASSNAME_SCROLLBAR
-			+ "-right";
+	private static final String CLASSNAME_CANVAS = VEventTimelineWidget.BROWSER_CLASSNAME	+ "-canvas";
+	private static final String CLASSNAME_SCROLLBAR = VEventTimelineWidget.BROWSER_CLASSNAME + "-scrollbar";
+	private static final String CLASSNAME_SCROLLBAR_LEFT = CLASSNAME_SCROLLBAR + "-left";
+	private static final String CLASSNAME_SCROLLBAR_RIGHT = CLASSNAME_SCROLLBAR	+ "-right";
 	private static final String CLASSNAME_FADE = CLASSNAME_SCROLLBAR + "-fade";
-	private static final String CLASSNAME_SCALE = VEventTimelineWidget.BROWSER_CLASSNAME
-			+ "-scale";
-	private static final String CLASSNAME_SCALELABEL = CLASSNAME_SCALE
-			+ "-label";
-
-	private static final String CLASSNAME_CURTAIN = VEventTimelineWidget.BROWSER_CLASSNAME
-			+ "-curtain";
+	private static final String CLASSNAME_SCALE = VEventTimelineWidget.BROWSER_CLASSNAME + "-scale";
+	private static final String CLASSNAME_SCALELABEL = CLASSNAME_SCALE + "-label";
+	private static final String CLASSNAME_CURTAIN = VEventTimelineWidget.BROWSER_CLASSNAME + "-curtain";
 
 	private final Element browserRoot;
 
@@ -105,23 +97,16 @@ public class VEventTimelineBrowser extends Widget implements VDataListener,
 			mouseScrollReg, mouseClickReg, preview;
 
 	private DateTimeFormat yearFormatShort = DateTimeFormat.getFormat("''yy");
-	private DateTimeFormat yearFormatLong = DateTimeFormat
-			.getFormat(PredefinedFormat.YEAR);
+	private DateTimeFormat yearFormatLong = DateTimeFormat.getFormat(PredefinedFormat.YEAR);
 
-	private DateTimeFormat monthFormatShort = DateTimeFormat
-			.getFormat(PredefinedFormat.YEAR_MONTH_ABBR);
-	private DateTimeFormat monthFormatLong = DateTimeFormat
-			.getFormat(PredefinedFormat.YEAR_MONTH);
+	private DateTimeFormat monthFormatShort = DateTimeFormat.getFormat(PredefinedFormat.YEAR_MONTH_ABBR);
+	private DateTimeFormat monthFormatLong = DateTimeFormat.getFormat(PredefinedFormat.YEAR_MONTH);
 
-	private DateTimeFormat dayFormatShort = DateTimeFormat
-			.getFormat(PredefinedFormat.YEAR_MONTH_ABBR_DAY);
-	private DateTimeFormat dayFormatLong = DateTimeFormat
-			.getFormat(PredefinedFormat.YEAR_MONTH_DAY);
+	private DateTimeFormat dayFormatShort = DateTimeFormat.getFormat(PredefinedFormat.YEAR_MONTH_ABBR_DAY);
+	private DateTimeFormat dayFormatLong = DateTimeFormat.getFormat(PredefinedFormat.YEAR_MONTH_DAY);
 
-	private DateTimeFormat timeFormatShort = DateTimeFormat
-			.getFormat(PredefinedFormat.HOUR24_MINUTE);
-	private DateTimeFormat timeFormatLong = DateTimeFormat
-			.getFormat(PredefinedFormat.HOUR24_MINUTE_SECOND);
+	private DateTimeFormat timeFormatShort = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE);
+	private DateTimeFormat timeFormatLong = DateTimeFormat.getFormat(PredefinedFormat.HOUR24_MINUTE_SECOND);
 
 	public VEventTimelineBrowser(VEventTimelineWidget tw) {
 		timelineWidget = tw;

@@ -45,30 +45,18 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 		MouseDownHandler, MouseUpHandler, MouseMoveHandler, MouseWheelHandler,
 		NativePreviewHandler {
 
-	private static final String CLASSNAME_BOTTOMBAR = VEventTimelineWidget.DISPLAY_CLASSNAME
-			+ "-bottombar";
-	private static final String CLASSNAME_CANVAS = VEventTimelineWidget.DISPLAY_CLASSNAME
-			+ "-canvas";
-	private static final String CLASSNAME_CANVASDRAG = CLASSNAME_CANVAS
-			+ "-drag";
-	private static final String CLASSNAME_LOADINGCURTAIN = VEventTimelineWidget.DISPLAY_CLASSNAME
-			+ "-curtain";
-	public static final String CLASSNAME_EVENT = VEventTimelineWidget.CLASSNAME
-			+ "-event";
-	public static final String CLASSNAME_EVENT_SELECTED = CLASSNAME_EVENT
-			+ "-selected";
-	public static final String CLASSNAME_EVENT_CAPTION = CLASSNAME_EVENT
-			+ "-caption";
-	public static final String CLASSNAME_EVENT_CONTENT = CLASSNAME_EVENT
-			+ "-content";
-	private static final String CLASSNAME_SCALEVALUE = VEventTimelineWidget.DISPLAY_CLASSNAME
-			+ "-vscale";
-	private static final String CLASSNAME_SCALEVALUEDRAG = CLASSNAME_SCALEVALUE
-			+ "-drag";
-	private static final String CLASSNAME_SCALEDATE = VEventTimelineWidget.DISPLAY_CLASSNAME
-			+ "-hscale";
-	private static final String CLASSNAME_SCALEDATE_LEFT = CLASSNAME_SCALEDATE
-			+ "-left";
+	private static final String CLASSNAME_BOTTOMBAR = VEventTimelineWidget.DISPLAY_CLASSNAME + "-bottombar";
+	private static final String CLASSNAME_CANVAS = VEventTimelineWidget.DISPLAY_CLASSNAME	+ "-canvas";
+	private static final String CLASSNAME_CANVASDRAG = CLASSNAME_CANVAS	+ "-drag";
+	private static final String CLASSNAME_LOADINGCURTAIN = VEventTimelineWidget.DISPLAY_CLASSNAME	+ "-curtain";
+	public static final String CLASSNAME_EVENT = VEventTimelineWidget.CLASSNAME	+ "-event";
+	public static final String CLASSNAME_EVENT_SELECTED = CLASSNAME_EVENT	+ "-selected";
+	public static final String CLASSNAME_EVENT_CAPTION = CLASSNAME_EVENT + "-caption";
+	public static final String CLASSNAME_EVENT_CONTENT = CLASSNAME_EVENT + "-content";
+	private static final String CLASSNAME_SCALEVALUE = VEventTimelineWidget.DISPLAY_CLASSNAME	+ "-vscale";
+	private static final String CLASSNAME_SCALEVALUEDRAG = CLASSNAME_SCALEVALUE	+ "-drag";
+	private static final String CLASSNAME_SCALEDATE = VEventTimelineWidget.DISPLAY_CLASSNAME + "-hscale";
+	private static final String CLASSNAME_SCALEDATE_LEFT = CLASSNAME_SCALEDATE + "-left";
 
 	public static final Long SECOND = 1000L;
 	public static final Long MINUTE = 60000L;
@@ -130,19 +118,14 @@ public class VEventTimelineDisplay extends Widget implements VDataListener,
 	private DateTimeFormat yearFormatShort = DateTimeFormat.getFormat("''yy");
 	private DateTimeFormat yearFormatLong = DateTimeFormat.getFormat("yyyy");
 
-	private DateTimeFormat monthFormatShort = DateTimeFormat
-			.getFormat("MMM yyyy");
-	private DateTimeFormat monthFormatLong = DateTimeFormat
-			.getFormat("MMMM yyyy");
+	private DateTimeFormat monthFormatShort = DateTimeFormat.getFormat("MMM yyyy");
+	private DateTimeFormat monthFormatLong = DateTimeFormat.getFormat("MMMM yyyy");
 
-	private DateTimeFormat dayFormatShort = DateTimeFormat
-			.getFormat("MMM d, yyyy");
-	private DateTimeFormat dayFormatLong = DateTimeFormat
-			.getFormat("MMMM d, yyyy");
+	private DateTimeFormat dayFormatShort = DateTimeFormat.getFormat("MMM d, yyyy");
+	private DateTimeFormat dayFormatLong = DateTimeFormat.getFormat("MMMM d, yyyy");
 
 	private DateTimeFormat timeFormatShort = DateTimeFormat.getFormat("HH:mm");
-	private DateTimeFormat timeFormatLong = DateTimeFormat
-			.getFormat("HH:mm:ss");
+	private DateTimeFormat timeFormatLong = DateTimeFormat.getFormat("HH:mm:ss");
 
 	public VEventTimelineDisplay(VEventTimelineWidget w) {
 		widget = w;

@@ -149,8 +149,7 @@ public class VClientCache {
 		 */
 		@Override
 		public String toString() {
-			DateTimeFormat formatter = DateTimeFormat
-					.getFormat(PredefinedFormat.DATE_TIME_SHORT);
+			DateTimeFormat formatter = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_SHORT);
 			Date f = new Date(from);
 			Date t = new Date(to);
 			return "Datarange: " + formatter.format(f) + " - "
@@ -223,10 +222,8 @@ public class VClientCache {
 		}
 
 		// Calculate new from and to times
-		Date from = r1.getStartTime() > r2.getStartTime() ? new Date(
-				r2.getStartTime()) : new Date(r1.getStartTime());
-		Date to = r1.getEndTime() > r2.getEndTime() ? new Date(r1.getEndTime())
-				: new Date(r2.getEndTime());
+		Date from = r1.getStartTime() > r2.getStartTime() ? new Date(r2.getStartTime()) : new Date(r1.getStartTime());
+		Date to = r1.getEndTime() > r2.getEndTime() ? new Date(r1.getEndTime())	: new Date(r2.getEndTime());
 
 		// Add events
 		Set<VEvent> events = new HashSet<VEvent>();
@@ -312,7 +309,6 @@ public class VClientCache {
 		}
 
 		for (DataRange dr : ranges) {
-			GWT.log(dr.toString());
 			if ((dr.inRange(from) && dr.inRange(to))
 					|| (dr.inRange(from)
 							&& to.getTime() > widget.getEndDate().getTime() && dr

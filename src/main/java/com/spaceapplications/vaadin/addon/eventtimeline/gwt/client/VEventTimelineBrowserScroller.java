@@ -15,31 +15,16 @@ import com.google.gwt.user.client.ui.Widget;
  * @author John Ahlroos / IT Mill Oy Ltd
  */
 public class VEventTimelineBrowserScroller extends Widget {
-    private static final String CLASSNAME_SCROLLAREA_CONTAINER = VEventTimelineWidget.BROWSER_CLASSNAME
-            + "-scrollarea";
-
-    private static final String CLASSNAME_SCROLLAREA_CONTENT = VEventTimelineWidget.BROWSER_CLASSNAME
-            + "-scrollarea-content";
-
-    private static final String CLASSNAME_SCROLLAREA_BAR = CLASSNAME_SCROLLAREA_CONTAINER
-            + "-bar";
-
-    private static final String CLASSNAME_SCROLLAREA_BAR_GRIP = CLASSNAME_SCROLLAREA_BAR
-            + "-grip";
-
-    private static final String CLASSNAME_SCROLLAREA_BAR_LEFT = CLASSNAME_SCROLLAREA_BAR
-            + "-left";
-
-    private static final String CLASSNAME_SCROLLAREA_BAR_RIGHT = CLASSNAME_SCROLLAREA_BAR
-            + "-right";
-
+  
+    private static final String CLASSNAME_SCROLLAREA_CONTAINER = VEventTimelineWidget.BROWSER_CLASSNAME + "-scrollarea";
+    private static final String CLASSNAME_SCROLLAREA_CONTENT = VEventTimelineWidget.BROWSER_CLASSNAME + "-scrollarea-content";
+    private static final String CLASSNAME_SCROLLAREA_BAR = CLASSNAME_SCROLLAREA_CONTAINER + "-bar";
+    private static final String CLASSNAME_SCROLLAREA_BAR_GRIP = CLASSNAME_SCROLLAREA_BAR + "-grip";
+    private static final String CLASSNAME_SCROLLAREA_BAR_LEFT = CLASSNAME_SCROLLAREA_BAR + "-left";
+    private static final String CLASSNAME_SCROLLAREA_BAR_RIGHT = CLASSNAME_SCROLLAREA_BAR + "-right";
     private static final String CLASSNAME_SIZE_ADJUSTER = "v-size-adjuster";
-
-    private static final String CLASSNAME_SIZE_ADJUSTER_LEFT = CLASSNAME_SIZE_ADJUSTER
-            + "-left";
-
-    private static final String CLASSNAME_SIZE_ADJUSTER_RIGHT = CLASSNAME_SIZE_ADJUSTER
-            + "-right";
+    private static final String CLASSNAME_SIZE_ADJUSTER_LEFT = CLASSNAME_SIZE_ADJUSTER + "-left";
+    private static final String CLASSNAME_SIZE_ADJUSTER_RIGHT = CLASSNAME_SIZE_ADJUSTER + "-right";
 
     private final Element scrollAreaContainer;
     private final Element scrollAreaContent;
@@ -78,12 +63,10 @@ public class VEventTimelineBrowserScroller extends Widget {
         scrollAreaContainer.appendChild(scrollAreaBar);
 
         scrollAreaLeftAdjuster = DOM.createDiv();
-        scrollAreaLeftAdjuster.setClassName(CLASSNAME_SIZE_ADJUSTER + " "
-                + CLASSNAME_SIZE_ADJUSTER_LEFT);
+        scrollAreaLeftAdjuster.setClassName(CLASSNAME_SIZE_ADJUSTER + " " + CLASSNAME_SIZE_ADJUSTER_LEFT);
 
         scrollAreaRightAdjuster = DOM.createDiv();
-        scrollAreaRightAdjuster.setClassName(CLASSNAME_SIZE_ADJUSTER + " "
-                + CLASSNAME_SIZE_ADJUSTER_RIGHT);
+        scrollAreaRightAdjuster.setClassName(CLASSNAME_SIZE_ADJUSTER + " " + CLASSNAME_SIZE_ADJUSTER_RIGHT);
 
         scrollAreaContent.appendChild(scrollAreaLeftAdjuster);
         scrollAreaContent.appendChild(scrollAreaRightAdjuster);
@@ -134,8 +117,7 @@ public class VEventTimelineBrowserScroller extends Widget {
     }
 
     public int getAreaWidth() {
-        return Integer.parseInt(DOM.getStyleAttribute(scrollAreaContainer,
-                "width").replace("px", ""));
+        return Integer.parseInt(DOM.getStyleAttribute(scrollAreaContainer, "width").replace("px", ""));
     }
 
     /**

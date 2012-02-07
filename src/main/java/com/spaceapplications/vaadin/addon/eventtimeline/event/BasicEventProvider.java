@@ -89,17 +89,13 @@ public class BasicEventProvider implements TimelineEventProvider,
 
 	public void addEvent(BasicEvent event) {
 		eventList.add(event);
-
 		event.addListener(this);
-
 		fireEventSetChange();
 	}
 
 	public void removeEvent(BasicEvent event) {
 		eventList.remove(event);
-
 		event.removeListener(this);
-
 		fireEventSetChange();
 	}
 
