@@ -37,6 +37,8 @@ public interface TimelineEventProvider extends Serializable {
 
   public void removeListener(EventSetChangeListener listener);
 
+  public TimelineEvent getEvent(final String eventId);
+  
   /**
    * Event to signal that the set of events has changed and the calendar
    * should refresh its view from the {@link TimelineEventProvider}.

@@ -82,12 +82,23 @@ public class BasicEventProvider implements TimelineEventProvider,
 	 * Returns all events and ignores any date ranges.
 	 */
 	public List<TimelineEvent> getEvents() {
-		ArrayList<TimelineEvent> activeEvents = new ArrayList<TimelineEvent>(
-				eventList);
+		ArrayList<TimelineEvent> activeEvents = new ArrayList<TimelineEvent>(eventList);
 		return activeEvents;
 	}
 
-	public void addEvent(BasicEvent event) {
+	/**
+	 * Return the event with the given event Id if it is available.
+	 */
+  public TimelineEvent getEvent(String eventId) {
+    for (TimelineEvent ev : eventList) {
+      if (eventId.equals(ev.getEventId())) {
+        return ev;
+      }
+    }
+    return null;
+  }
+
+  public void addEvent(BasicEvent event) {
 		eventList.add(event);
 		event.addListener(this);
 		fireEventSetChange();
