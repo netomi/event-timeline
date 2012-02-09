@@ -5,6 +5,8 @@ Version 0.6.0 - xx.xx.2012
 --------------------------
 
    - improved initialization procedure (reduced steps and requests)
+   - fixed lock selection when data updates are received
+   - added getEvents(String) method to TimelineEventProvider
    
 Version 0.5.1 - 17.01.2012
 --------------------------
