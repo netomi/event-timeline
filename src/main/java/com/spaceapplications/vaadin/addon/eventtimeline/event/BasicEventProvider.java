@@ -13,28 +13,25 @@ import java.util.TreeSet;
 
 /**
  * <p>
- * Simple implementation of {@link TimelineEventProvider}. Use
- * {@link #addEvent(BasicEvent)} and {@link #removeEvent(BasicEvent)} to add /
- * remove events.
+ * Simple implementation of {@link TimelineEventProvider}. Use {@link #addEvent(BasicEvent)} and
+ * {@link #removeEvent(BasicEvent)} to add / remove events.
  * </p>
  * 
  * <p>
- * {@link TimelineEventProvider.EventSetChangeNotifier EventSetChangeNotifier}
- * and {@link TimelineEvent.EventChangeListener EventChangeListener} are also
- * implemented, so the Calendar is notified when an event is added, changed or
- * removed.
+ * {@link TimelineEventProvider.EventSetChangeNotifier EventSetChangeNotifier} and
+ * {@link TimelineEvent.EventChangeListener EventChangeListener} are also implemented, so the
+ * Calendar is notified when an event is added, changed or removed.
  * </p>
  */
 public class BasicEventProvider implements TimelineEventProvider,
-		TimelineEventProvider.EventSetChangeNotifier,
-		TimelineEvent.EventChangeListener {
+    TimelineEventProvider.EventSetChangeNotifier, TimelineEvent.EventChangeListener {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	protected Set<TimelineEvent> eventList = new TreeSet<TimelineEvent>(new EventComparator());
+  protected Set<TimelineEvent> eventList = new TreeSet<TimelineEvent>(new EventComparator());
 
-	private static class EventComparator implements Comparator<TimelineEvent>, Serializable {
-	  
+  private static class EventComparator implements Comparator<TimelineEvent>, Serializable {
+
     private static final long serialVersionUID = -3838480424724696804L;
 
     @Override
@@ -51,44 +48,43 @@ public class BasicEventProvider implements TimelineEventProvider,
         }
       }
     }
-	}
-	
-	private List<EventSetChangeListener> listeners = new ArrayList<EventSetChangeListener>();
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public List<TimelineEvent> getEvents(Date startDate, Date endDate) {
-		ArrayList<TimelineEvent> activeEvents = new ArrayList<TimelineEvent>();
+  private List<EventSetChangeListener> listeners = new ArrayList<EventSetChangeListener>();
 
-		for (TimelineEvent ev : eventList) {
-			long from = startDate.getTime();
-			long to = endDate.getTime();
+  /**
+   * {@inheritDoc}
+   */
+  public List<TimelineEvent> getEvents(Date startDate, Date endDate) {
+    ArrayList<TimelineEvent> activeEvents = new ArrayList<TimelineEvent>();
 
-			long f = ev.getStart().getTime();
-			long t = ev.getEnd().getTime();
-			// Select only events that overlaps with startDate and
-			// endDate.
-			if ((f <= to && f >= from) || (t >= from && t <= to)
-					|| (f <= from && t >= to)) {
-				activeEvents.add(ev);
-			}
-		}
+    for (TimelineEvent ev : eventList) {
+      long from = startDate.getTime();
+      long to = endDate.getTime();
 
-		return activeEvents;
-	}
+      long f = ev.getStart().getTime();
+      long t = ev.getEnd().getTime();
+      // Select only events that overlaps with startDate and
+      // endDate.
+      if ((f <= to && f >= from) || (t >= from && t <= to) || (f <= from && t >= to)) {
+        activeEvents.add(ev);
+      }
+    }
 
-	/**
-	 * Returns all events and ignores any date ranges.
-	 */
-	public List<TimelineEvent> getEvents() {
-		ArrayList<TimelineEvent> activeEvents = new ArrayList<TimelineEvent>(eventList);
-		return activeEvents;
-	}
+    return activeEvents;
+  }
 
-	/**
-	 * Return the event with the given event Id if it is available.
-	 */
+  /**
+   * Returns all events and ignores any date ranges.
+   */
+  public List<TimelineEvent> getEvents() {
+    ArrayList<TimelineEvent> activeEvents = new ArrayList<TimelineEvent>(eventList);
+    return activeEvents;
+  }
+
+  /**
+   * Return the event with the given event Id if it is available.
+   */
   public TimelineEvent getEvent(String eventId) {
     for (TimelineEvent ev : eventList) {
       if (eventId.equals(ev.getEventId())) {
@@ -99,48 +95,48 @@ public class BasicEventProvider implements TimelineEventProvider,
   }
 
   public void addEvent(BasicEvent event) {
-		eventList.add(event);
-		event.addListener(this);
-		fireEventSetChange();
-	}
+    eventList.add(event);
+    event.addListener(this);
+    fireEventSetChange();
+  }
 
-	public void removeEvent(BasicEvent event) {
-		eventList.remove(event);
-		event.removeListener(this);
-		fireEventSetChange();
-	}
+  public void removeEvent(BasicEvent event) {
+    eventList.remove(event);
+    event.removeListener(this);
+    fireEventSetChange();
+  }
 
-	public boolean containsEvent(BasicEvent event) {
-		return eventList.contains(event);
-	}
+  public boolean containsEvent(BasicEvent event) {
+    return eventList.contains(event);
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void addListener(EventSetChangeListener listener) {
-		listeners.add(listener);
-	}
+  /**
+   * {@inheritDoc}
+   */
+  public void addListener(EventSetChangeListener listener) {
+    listeners.add(listener);
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void removeListener(EventSetChangeListener listener) {
-		listeners.remove(listener);
-	}
+  /**
+   * {@inheritDoc}
+   */
+  public void removeListener(EventSetChangeListener listener) {
+    listeners.remove(listener);
+  }
 
-	protected void fireEventSetChange() {
-		EventSetChange event = new EventSetChange(this);
+  protected void fireEventSetChange() {
+    EventSetChange event = new EventSetChange(this);
 
-		for (EventSetChangeListener listener : listeners) {
-			listener.eventSetChange(event);
-		}
-	}
+    for (EventSetChangeListener listener : listeners) {
+      listener.eventSetChange(event);
+    }
+  }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void eventChange(TimelineEvent.EventChange changeEvent) {
-		// naive implementation
-		fireEventSetChange();
-	}
+  /**
+   * {@inheritDoc}
+   */
+  public void eventChange(TimelineEvent.EventChange changeEvent) {
+    // naive implementation
+    fireEventSetChange();
+  }
 }
