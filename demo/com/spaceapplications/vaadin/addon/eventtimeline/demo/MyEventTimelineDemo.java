@@ -58,6 +58,11 @@ public class MyEventTimelineDemo extends Application {
     timeline.addListener(new EventTimeline.EventClickListener() {
       public void eventClick(EventButtonClickEvent event) {
         getMainWindow().showNotification("clicked event " + event.getItemId());
+        
+        BasicEvent e = (BasicEvent) eventProvider1.getEvent((String) event.getItemId());
+        if (e != null) {
+          e.setCaption("Test");
+        }
       }
     });
   }

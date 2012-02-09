@@ -667,8 +667,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 	private Timer refreshTimer = new Timer() {
 		@Override
 		public void run() {
-			// Render the browser canvas (refreshes the selection after loading
-			// the data)
+			// Render the browser canvas (refreshes the selection after loading the data)
 			browser.refresh();
 
 			if (selectionLock) {
@@ -677,8 +676,7 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 				 * on the browser will update the display once it has finished
 				 * loading and recalculated the new selection
 				 */
-				display.setRange(browser.getSelectedStartDate(),
-						browser.getSelectedEndDate());
+				display.setRange(browser.getSelectedStartDate(), browser.getSelectedEndDate());
 			}
 		}
 	};

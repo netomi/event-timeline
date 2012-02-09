@@ -70,28 +70,38 @@ public class BasicEvent implements TimelineEvent, TimelineEvent.EventChangeNotif
   // setters for properties
 
   public void setCaption(String caption) {
-    this.caption = caption;
-    fireEventChange();
+    if (this.caption == null || !this.caption.equals(caption)) {
+      this.caption = caption;
+      fireEventChange();
+    }
   }
 
   public void setDescription(String description) {
-    this.description = description;
-    fireEventChange();
+    if (this.description == null || !this.description.equals(description)) {
+      this.description = description;
+      fireEventChange();
+    }
   }
 
   public void setEnd(Date end) {
-    this.end = end;
-    fireEventChange();
+    if (this.end == null || !this.end.equals(end)) {
+      this.end = end;
+      fireEventChange();
+    }
   }
 
   public void setStart(Date start) {
-    this.start = start;
-    fireEventChange();
+    if (this.start == null || !this.start.equals(start)) {
+      this.start = start;
+      fireEventChange();
+    }
   }
 
   public void setStyleName(String styleName) {
-    this.styleName = styleName;
-    fireEventChange();
+    if (this.styleName == null || !this.styleName.equals(styleName)) {
+      this.styleName = styleName;
+      fireEventChange();
+    }
   }
 
   /**

@@ -230,7 +230,8 @@ public class VEventTimelineBrowser extends Widget implements VDataListener,
 		plotData();
 
 		// Set the scroller range
-		setRange(selectedStartDate, selectedEndDate);
+    // disable as this causes problems when an event is updated
+		//setRange(selectedStartDate, selectedEndDate);
 	}
 
 	/*
@@ -247,7 +248,6 @@ public class VEventTimelineBrowser extends Widget implements VDataListener,
 			// TODO - Thomas -> what do you think about #clear()?
 			// Should be OK since events always contains all events
 			bandEvents.clear();
-			
 			bandEvents.addAll(events);
 		}
 	}
@@ -267,7 +267,8 @@ public class VEventTimelineBrowser extends Widget implements VDataListener,
 		 */
 		if (timelineWidget.isInitDone() && timelineWidget.isSelectionLocked()
 				&& !mouseDown) {
-			setRange(selectedStartDate, selectedEndDate);
+		  // disable as this causes problems when an event is updated
+			//setRange(selectedStartDate, selectedEndDate);
 		} else {
 			refreshSelection();
 		}
