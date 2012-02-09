@@ -912,15 +912,6 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 		setBandSelectionEnabled(uidl);
 		setDateFormatInfo(uidl);
 
-		if (isInitDone() || uiRequiresRangeRefresh) {
-			uiRequiresRangeRefresh = false;
-			browser.setRange(selectedStartDate, selectedEndDate);
-			display.setRange(selectedStartDate, selectedEndDate);
-	    if (browserIsVisible) {
-	      browser.refresh();
-	    }
-		}
-
 		// Data received
 		List<VEvent> events = null;
 		UIDL bands = uidl.getChildByTagName("events");
@@ -945,18 +936,27 @@ public class VEventTimelineWidget extends Composite implements Paintable {
 				}
 			}
 
-			display.dataReceivedAll();
-			browser.dataReceivedAll();
 			runningDataRequest = false;
-
 			display.redraw();
 		}
 
-		setDirty(uidl);
-		
 		if (!initDone) {
 	      initDone = true;
 		}
+		
+    if (isInitDone() && uiRequiresRangeRefresh) {
+      uiRequiresRangeRefresh = false;
+      browser.setRange(selectedStartDate, selectedEndDate);
+      display.setRange(selectedStartDate, selectedEndDate);
+    }
+    
+    if (isInitDone()) {
+      if (browserIsVisible) {
+        browser.refresh();
+      }
+    }
+    
+    setDirty(uidl);
 	}
 
 	private void setNoData(UIDL uidl) {
