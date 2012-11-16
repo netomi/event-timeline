@@ -1084,7 +1084,14 @@ public class EventTimeline extends AbstractComponent implements EventSetChangeLi
     if (result != null) {
       result.getProvider().removeListener(this);
       bandInfos.remove(result);
-      bandsToBeRemoved.add(result);
+      // if the band was added previously before sending the band
+      // to the client, than remove the band again
+      if (bandsToBeAdded.contains(result)) {
+        bandsToBeAdded.remove(result);
+        eventsToSend.remove(result.getBandId());
+      } else {
+        bandsToBeRemoved.add(result);
+      }
     }
 
     if (initDone) {
