@@ -1,12 +1,13 @@
                                      EVENT TIMELINE
                                   Development Changelog
 
-Version 0.6.0 - xx.xx.2012
+Version 0.6.0 - 11.04.2013
 --------------------------
 
    - improved initialization procedure (reduced steps and requests)
    - fixed lock selection when data updates are received
    - added getEvents(String) method to TimelineEventProvider
+   - remove band only once, contributed by Florian Pirchner
    
 Version 0.5.1 - 17.01.2012
 --------------------------
